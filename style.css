@@ -384,6 +384,42 @@ a {
   transition: var(--transition);
 }
 
+.hamburger.active span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* Desktop / Mobile helper visibility */
+.mobile-only-wallet {
+  display: none;
+}
+.desktop-only-wallet {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .mobile-only-wallet {
+    display: block;
+    margin-top: 1rem;
+    width: 100%;
+    text-align: center;
+  }
+  .mobile-only-wallet .wallet-connected-badge {
+    justify-content: center;
+    width: 100%;
+  }
+  .desktop-only-wallet {
+    display: none;
+  }
+}
+
 /* ── Glassmorphism Card ── */
 .glass-card {
   background: var(--glass-bg);

@@ -31,17 +31,30 @@
       <li><a href="registry.html" class="nav-link active">Fact Registry</a></li>
       <li><a href="anatomy.html" class="nav-link">Anatomy Guide</a></li>
       <li><a href="portfolio.html" class="nav-link">Investigator Panel</a></li>
+      <li class="mobile-only-wallet">
+        <button class="btn btn-wallet btn-connect-wallet">Connect Wallet</button>
+        <div class="wallet-connected-badge wallet-info-bar" style="display:none;">
+          <span class="wallet-dot"></span>
+          <span class="wallet-address-display">0x00...0000</span>
+          <span style="margin: 0 0.5rem; color: var(--glass-border);">|</span>
+          <span class="wallet-balance-display">0.00 GEN</span>
+          <span style="margin: 0 0.5rem; color: var(--glass-border);">|</span>
+          <button class="btn-disconnect btn-disconnect-wallet" title="Disconnect Wallet">Disconnect</button>
+        </div>
+      </li>
     </ul>
 
     <div class="nav-actions">
-      <button class="btn btn-wallet" id="connect-wallet-btn">Connect Wallet</button>
-      <div class="wallet-connected-badge" id="wallet-info-bar" style="display:none;">
-        <span class="wallet-dot"></span>
-        <span id="wallet-address-display">0x00...0000</span>
-        <span style="margin:0 0.5rem;color:var(--glass-border);">|</span>
-        <span id="wallet-balance-display">0.00 GEN</span>
-        <span style="margin:0 0.5rem;color:var(--glass-border);">|</span>
-        <button class="btn-disconnect" id="disconnect-btn" title="Disconnect Wallet">Disconnect</button>
+      <div class="desktop-only-wallet">
+        <button class="btn btn-wallet btn-connect-wallet">Connect Wallet</button>
+        <div class="wallet-connected-badge wallet-info-bar" style="display:none;">
+          <span class="wallet-dot"></span>
+          <span class="wallet-address-display">0x00...0000</span>
+          <span style="margin: 0 0.5rem; color: var(--glass-border);">|</span>
+          <span class="wallet-balance-display">0.00 GEN</span>
+          <span style="margin: 0 0.5rem; color: var(--glass-border);">|</span>
+          <button class="btn-disconnect btn-disconnect-wallet" title="Disconnect Wallet">Disconnect</button>
+        </div>
       </div>
       <button class="hamburger" id="hamburger">
         <span></span>

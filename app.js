@@ -208,28 +208,39 @@ async function restoreWalletSession() {
 
 // ── Update Navbar Wallet UI ──
 async function updateWalletUI() {
-  const connectBtn = document.getElementById('connect-wallet-btn');
-  const walletInfo = document.getElementById('wallet-info-bar');
-  const walletAddrEl = document.getElementById('wallet-address-display');
-  const walletBalEl = document.getElementById('wallet-balance-display');
+  const connectBtns = document.querySelectorAll('.btn-connect-wallet');
+  const walletInfos = document.querySelectorAll('.wallet-info-bar');
+  const walletAddrEls = document.querySelectorAll('.wallet-address-display');
+  const walletBalEls = document.querySelectorAll('.wallet-balance-display');
 
-  if (window.irisynWallet.isConnected && window.irisynWallet.address) {
-    if (connectBtn) connectBtn.style.display = 'none';
-    if (walletInfo) walletInfo.style.display = 'flex';
-    if (walletAddrEl) walletAddrEl.textContent = shortenAddress(window.irisynWallet.address);
-    
-    if (walletBalEl && window.getNativeBalance) {
-      try {
-        const bal = await window.getNativeBalance(window.irisynWallet.address);
-        walletBalEl.textContent = `${parseFloat(bal).toFixed(2)} GEN`;
-      } catch (e) {
-        walletBalEl.textContent = '0.00 GEN';
-      }
+  const isConnected = window.irisynWallet.isConnected && window.irisynWallet.address;
+  const address = window.irisynWallet.address;
+
+  let bal = '0.00 GEN';
+  if (isConnected && window.getNativeBalance) {
+    try {
+      const nativeBal = await window.getNativeBalance(address);
+      bal = `${parseFloat(nativeBal).toFixed(2)} GEN`;
+    } catch (e) {
+      bal = '0.00 GEN';
     }
-  } else {
-    if (connectBtn) connectBtn.style.display = 'flex';
-    if (walletInfo) walletInfo.style.display = 'none';
   }
+
+  connectBtns.forEach(btn => {
+    btn.style.display = isConnected ? 'none' : 'inline-flex';
+  });
+
+  walletInfos.forEach(info => {
+    info.style.display = isConnected ? 'flex' : 'none';
+  });
+
+  walletAddrEls.forEach(el => {
+    el.textContent = shortenAddress(address);
+  });
+
+  walletBalEls.forEach(el => {
+    el.textContent = bal;
+  });
 }
 
 // ── Utilities ──
@@ -878,16 +889,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Attach button listeners
-  const connectBtn = document.getElementById('connect-wallet-btn');
-  if (connectBtn) {
-    connectBtn.addEventListener('click', connectWallet);
-  }
+  // Attach button listeners (handles both desktop and mobile dropdown views)
+  document.querySelectorAll('.btn-connect-wallet').forEach(btn => {
+    btn.addEventListener('click', connectWallet);
+  });
 
-  const disconnectBtn = document.getElementById('disconnect-btn');
-  if (disconnectBtn) {
-    disconnectBtn.addEventListener('click', disconnectWallet);
-  }
+  document.querySelectorAll('.btn-disconnect-wallet').forEach(btn => {
+    btn.addEventListener('click', disconnectWallet);
+  });
 
   // Load screen-specific data
   const currentPage = window.location.pathname.split('/').pop();
