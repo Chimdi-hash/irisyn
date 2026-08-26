@@ -158,10 +158,12 @@ function disconnectWallet() {
   showToast('Wallet disconnected.', 'info');
 
   const currentPage = window.location.pathname.split('/').pop();
-  if (currentPage === 'portfolio.html') {
+  if (currentPage === 'portfolio.html' || currentPage === 'registry.html') {
     setTimeout(() => window.location.reload(), 1200);
   }
 }
+window.disconnectWallet = disconnectWallet;
+window.connectWallet = connectWallet;
 
 // ── Event Handlers ──
 function handleAccountsChanged(accounts) {
@@ -880,6 +882,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const connectBtn = document.getElementById('connect-wallet-btn');
   if (connectBtn) {
     connectBtn.addEventListener('click', connectWallet);
+  }
+
+  const disconnectBtn = document.getElementById('disconnect-btn');
+  if (disconnectBtn) {
+    disconnectBtn.addEventListener('click', disconnectWallet);
   }
 
   // Load screen-specific data

@@ -47,7 +47,7 @@
   --font-mono: 'Fira Code', monospace;
 
   /* Dimensions */
-  --nav-height: 70px;
+  --nav-height: 54px;
   --border-radius-sm: 8px;
   --border-radius: 16px;
   --border-radius-lg: 24px;
@@ -67,7 +67,7 @@
 
 html {
   scroll-behavior: smooth;
-  font-size: 16px;
+  font-size: 13.5px;
 }
 
 body {
@@ -321,6 +321,26 @@ a {
   border-color: var(--sky-500);
 }
 
+.btn-disconnect {
+  background: transparent;
+  border: none;
+  color: var(--debunked-color);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.2rem 0.5rem;
+  margin-left: 0.5rem;
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-disconnect:hover {
+  background: var(--debunked-bg);
+  text-decoration: underline;
+}
+
 .wallet-connected-badge {
   display: flex;
   align-items: center;
@@ -372,7 +392,7 @@ a {
   border: 1px solid var(--glass-border);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--glass-shadow);
-  padding: 2.25rem;
+  padding: 1.5rem 1.75rem;
   transition: var(--transition);
   color: var(--black);
 }
@@ -404,7 +424,7 @@ a {
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 3rem 1.5rem;
+  padding: 1.75rem 1.25rem;
 }
 
 /* ── HERO SECTION (index.html) ── */
