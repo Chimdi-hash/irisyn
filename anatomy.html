@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anatomy Guide — IRISYN | GenLayer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background Particles -->
+  <div class="particle-container" id="particle-field"></div>
+  <div class="floating-orb orb-sky-1" style="opacity: 0.4;"></div>
+  <div class="floating-orb orb-sky-2" style="opacity: 0.4;"></div>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="6" fill="none" opacity="0.3"/>
+        <circle cx="50" cy="50" r="22" stroke="currentColor" stroke-width="4" fill="none"/>
+        <circle cx="50" cy="50" r="10" fill="currentColor"/>
+        <path d="M15 50 Q50 15 85 50" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M15 50 Q50 85 85 50" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+      IRISYN<span>.</span>
+    </a>
+    
+    <ul class="nav-links" id="nav-links">
+      <li><a href="index.html" class="nav-link">Home</a></li>
+      <li><a href="registry.html" class="nav-link">Fact Registry</a></li>
+      <li><a href="anatomy.html" class="nav-link active">Anatomy Guide</a></li>
+      <li><a href="portfolio.html" class="nav-link">Investigator Panel</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="btn btn-wallet" id="connect-wallet-btn">Connect Wallet</button>
+      <div class="wallet-connected-badge" id="wallet-info-bar" style="display:none;">
+        <span class="wallet-dot"></span>
+        <span id="wallet-address-display">0x00...0000</span>
+        <span style="margin: 0 0.5rem; color: var(--glass-border);">|</span>
+        <span id="wallet-balance-display">0.00 GEN</span>
+      </div>
+      <button class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      
+      <div style="margin-bottom: 3rem;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Interactive Ophthalmology Guide</h1>
+        <p style="color:var(--dark-gray); max-width: 700px;">
+          Explore the anatomy of the human eye. Hover or click on the eye structures to highlight their visual function and associated medical conditions.
+        </p>
+      </div>
+
+      <section class="anatomy-grid">
+        
+        <!-- Interactive Diagram (Sticky Left) -->
+        <div class="glass-card anatomy-diagram-card">
+          <h3 style="margin-bottom: 1.5rem; text-align: center;">Ocular Structure</h3>
+          <div class="svg-diagram-wrapper">
+            <svg viewBox="0 0 400 400" id="eye-anatomy-svg">
+              <!-- Sclera (Outer White Shell) -->
+              <circle cx="200" cy="200" r="160" fill="#f8fafc" stroke="var(--sky-400)" stroke-width="3" />
+              
+              <!-- Optic Nerve Trunk -->
+              <path class="diagram-interactive-part" id="svg-nerve" d="M40 200 Q20 220 15 250 L20 270 Q40 240 52 220 Z" fill="#fed7aa" stroke="#ea580c" stroke-width="2" onclick="selectAnatomy('nerve')" />
+              
+              <!-- Retina (Inner Back Layer) -->
+              <path class="diagram-interactive-part" id="svg-retina" d="M120 70 A140 140 0 0 0 120 330 A160 160 0 0 1 120 70" fill="rgba(244, 63, 94, 0.15)" stroke="#f43f5e" stroke-width="3" onclick="selectAnatomy('retina')" />
+              
+              <!-- Vitreous Humor (Center) -->
+              <circle cx="200" cy="200" r="120" fill="rgba(14, 165, 233, 0.05)" stroke="none"/>
+              
+              <!-- Lens (Crystalline structure) -->
+              <ellipse class="diagram-interactive-part" id="svg-lens" cx="295" cy="200" rx="20" ry="45" fill="rgba(255, 255, 255, 0.8)" stroke="var(--sky-500)" stroke-width="3" onclick="selectAnatomy('lens')" />
+              
+              <!-- Iris (Colored Ring) -->
+              <path class="diagram-interactive-part" id="svg-iris" d="M325 140 L315 155 L315 245 L325 260 A45 45 0 0 0 325 140" fill="var(--sky-300)" stroke="var(--sky-600)" stroke-width="3" onclick="selectAnatomy('iris')" />
+              
+              <!-- Pupil (Center of Iris) -->
+              <rect class="diagram-interactive-part" id="svg-pupil" x="313" y="175" width="6" height="50" rx="3" fill="#0f172a" onclick="selectAnatomy('pupil')" />
+              
+              <!-- Cornea (Outer Dome) -->
+              <path class="diagram-interactive-part" id="svg-cornea" d="M335 120 A85 85 0 0 1 335 280 A120 120 0 0 0 335 120" fill="rgba(56, 189, 248, 0.2)" stroke="var(--sky-600)" stroke-width="3" onclick="selectAnatomy('cornea')" />
+              
+              <!-- Labels Lines (Dashed) -->
+              <line x1="365" y1="200" x2="380" y2="200" stroke="var(--mid-gray)" stroke-width="1" stroke-dasharray="3,3" />
+              <line x1="295" y1="150" x2="295" y2="100" stroke="var(--mid-gray)" stroke-width="1" stroke-dasharray="3,3" />
+              <line x1="120" y1="100" x2="90" y2="80" stroke="var(--mid-gray)" stroke-width="1" stroke-dasharray="3,3" />
+              <line x1="35" y1="230" x2="55" y2="270" stroke="var(--mid-gray)" stroke-width="1" stroke-dasharray="3,3" />
+            </svg>
+          </div>
+          <p style="font-size:0.8rem; color:var(--mid-gray); margin-top:1.5rem; text-align:center;">
+            💡 Click on the Cornea, Iris, Pupil, Lens, Retina, or Optic Nerve to explore.
+          </p>
+        </div>
+
+        <!-- Description List (Right) -->
+        <div class="anatomy-detail-list">
+          
+          <!-- Cornea -->
+          <div class="glass-card anatomy-detail-item active" id="part-cornea" onclick="highlightPart('cornea')">
+            <h3 class="anatomy-part-title">
+              The Cornea
+              <span class="anatomy-part-label">Front Window</span>
+            </h3>
+            <p style="margin-bottom:1rem;">
+              The cornea is the clear, dome-shaped outer layer at the front of the eye. It acts as the eye's primary lens, focusing light as it enters. It accounts for approximately two-thirds of the eye's total optical power.
+            </p>
+            <div style="font-size:0.85rem; background:rgba(255,255,255,0.4); padding:0.75rem 1rem; border-radius:var(--border-radius);">
+              <strong>Associated Conditions:</strong> Astigmatism (uneven curvature), Keratitis (inflammation), Dry Eye Syndrome.
+            </div>
+          </div>
+
+          <!-- Pupil / Iris -->
+          <div class="glass-card anatomy-detail-item" id="part-iris" onclick="highlightPart('iris')">
+            <h3 class="anatomy-part-title">
+              The Iris & Pupil
+              <span class="anatomy-part-label">Light Aperture</span>
+            </h3>
+            <p style="margin-bottom:1rem;">
+              The iris is the colored ring of muscle fibers that controls the size of the pupil (the dark opening in the center). By expanding or contracting, the iris regulates the exact amount of light entering the inner eye.
+            </p>
+            <div style="font-size:0.85rem; background:rgba(255,255,255,0.4); padding:0.75rem 1rem; border-radius:var(--border-radius);">
+              <strong>Associated Conditions:</strong> Anisocoria (unequal pupil size), Iritis (inflammation of the iris), Mydriasis.
+            </div>
+          </div>
+
+          <!-- Lens -->
+          <div class="glass-card anatomy-detail-item" id="part-lens" onclick="highlightPart('lens')">
+            <h3 class="anatomy-part-title">
+              Crystalline Lens
+              <span class="anatomy-part-label">Dynamic Focus</span>
+            </h3>
+            <p style="margin-bottom:1rem;">
+              Located directly behind the pupil, the crystalline lens is a transparent structure that alters its shape (accommodation) to focus light perfectly onto the retina, allowing for sharp vision at various distances.
+            </p>
+            <div style="font-size:0.85rem; background:rgba(255,255,255,0.4); padding:0.75rem 1rem; border-radius:var(--border-radius);">
+              <strong>Associated Conditions:</strong> Cataracts (clouding of the lens), Presbyopia (aging-related loss of close focus).
+            </div>
+          </div>
+
+          <!-- Retina -->
+          <div class="glass-card anatomy-detail-item" id="part-retina" onclick="highlightPart('retina')">
+            <h3 class="anatomy-part-title">
+              The Retina & Macula
+              <span class="anatomy-part-label">Light Sensor</span>
+            </h3>
+            <p style="margin-bottom:1rem;">
+              The retina is the light-sensitive layer lining the back of the eye. It contains millions of photoreceptors (rods and cones) that convert light rays into electrical impulses. The macula is the center of the retina, providing high-acuity central vision.
+            </p>
+            <div style="font-size:0.85rem; background:rgba(255,255,255,0.4); padding:0.75rem 1rem; border-radius:var(--border-radius);">
+              <strong>Associated Conditions:</strong> Macular Degeneration (AMD), Diabetic Retinopathy, Retinal Detachment.
+            </div>
+          </div>
+
+          <!-- Optic Nerve -->
+          <div class="glass-card anatomy-detail-item" id="part-nerve" onclick="highlightPart('nerve')">
+            <h3 class="anatomy-part-title">
+              The Optic Nerve
+              <span class="anatomy-part-label">Visual Conduit</span>
+            </h3>
+            <p style="margin-bottom:1rem;">
+              The optic nerve is a cable of over a million nerve fibers that transmits electrical impulses from the retina to the brain's visual cortex. The brain processes these signals to reconstruct the images we see.
+            </p>
+            <div style="font-size:0.85rem; background:rgba(255,255,255,0.4); padding:0.75rem 1rem; border-radius:var(--border-radius);">
+              <strong>Associated Conditions:</strong> Glaucoma (pressure damage to nerve fibers), Optic Neuritis.
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- Visual Hygiene & Safety Checklist -->
+      <section class="glass-card" style="margin-top: 5rem; padding: 3rem 2.25rem;">
+        <h2 style="font-size: 1.75rem; text-align: center; margin-bottom: 2.5rem;">Visual Hygiene Guidelines</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+          <div>
+            <h4 style="font-family: var(--font-body); font-size:1.1rem; margin-bottom: 0.75rem; display:flex; align-items:center; gap:0.5rem;">
+              <span style="color: var(--sky-600);">👁</span> The 20-20-20 Rule
+            </h4>
+            <p style="font-size: 0.9rem;">To reduce digital eye strain, look away from your screen every 20 minutes, focus on an object at least 20 feet away, for at least 20 seconds.</p>
+          </div>
+          <div>
+            <h4 style="font-family: var(--font-body); font-size:1.1rem; margin-bottom: 0.75rem; display:flex; align-items:center; gap:0.5rem;">
+              <span style="color: var(--sky-600);">🕶</span> UV Protection
+            </h4>
+            <p style="font-size: 0.9rem;">Prolonged UV exposure can accelerate cataracts and macular degeneration. Always wear sunglasses that block 99% to 100% of UVA and UVB rays.</p>
+          </div>
+          <div>
+            <h4 style="font-family: var(--font-body); font-size:1.1rem; margin-bottom: 0.75rem; display:flex; align-items:center; gap:0.5rem;">
+              <span style="color: var(--sky-600);">🩺</span> Regular Dilated Exams
+            </h4>
+            <p style="font-size: 0.9rem;">Many vision-threatening diseases (like glaucoma and diabetic retinopathy) develop silently. Regular dilated exams are the only way to detect them early.</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer style="margin-top: 5rem; border-top: 1px solid var(--glass-border); padding: 2rem 0; text-align: center; color: var(--mid-gray); font-size: 0.9rem;">
+    <div class="container">
+      <p>© 2026 IRISYN Fact Registry. Built on GenLayer Studio.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="genlayer_bundle.js"></script>
+  <script src="app.js"></script>
+  <script>
+    function selectAnatomy(partId) {
+      highlightPart(partId);
+      // Scroll to the active card smoothly
+      const targetEl = document.getElementById(`part-${partId}`);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function highlightPart(partId) {
+      // Remove active class from all text cards
+      document.querySelectorAll('.anatomy-detail-item').forEach(el => {
+        el.classList.remove('active');
+      });
+      // Add to active
+      const activeCard = document.getElementById(`part-${partId}`);
+      if (activeCard) activeCard.classList.add('active');
+
+      // Highlight SVG part
+      const svgParts = ['cornea', 'iris', 'pupil', 'lens', 'retina', 'nerve'];
+      svgParts.forEach(id => {
+        const path = document.getElementById(`svg-${id}`);
+        if (path) {
+          if (id === partId) {
+            path.style.filter = 'brightness(1.1) drop-shadow(0 0 6px var(--sky-500))';
+            if (id === 'iris') {
+              path.style.fill = 'var(--sky-400)';
+            }
+          } else {
+            path.style.filter = 'none';
+            if (id === 'iris') {
+              path.style.fill = 'var(--sky-300)';
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

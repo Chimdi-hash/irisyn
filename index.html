@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IRISYN — Decentralized Eye Health Fact Registry | GenLayer</title>
+  <meta name="description" content="Irisyn is a decentralized, staked fact-checking registry for ophthalmology claims, built using GenLayer intelligent contracts on the Studio Network.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Floating Background Particles -->
+  <div class="particle-container" id="particle-field"></div>
+  <div class="floating-orb orb-sky-1"></div>
+  <div class="floating-orb orb-sky-2"></div>
+  <div class="floating-orb orb-sky-3"></div>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="6" fill="none" opacity="0.3"/>
+        <circle cx="50" cy="50" r="22" stroke="currentColor" stroke-width="4" fill="none"/>
+        <circle cx="50" cy="50" r="10" fill="currentColor"/>
+        <path d="M15 50 Q50 15 85 50" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M15 50 Q50 85 85 50" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+      IRISYN<span>.</span>
+    </a>
+    
+    <ul class="nav-links" id="nav-links">
+      <li><a href="index.html" class="nav-link active">Home</a></li>
+      <li><a href="registry.html" class="nav-link">Fact Registry</a></li>
+      <li><a href="anatomy.html" class="nav-link">Anatomy Guide</a></li>
+      <li><a href="portfolio.html" class="nav-link">Investigator Panel</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="btn btn-wallet" id="connect-wallet-btn">
+        <svg style="width:18px;height:18px;fill:currentColor;" viewBox="0 0 24 24">
+          <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+        </svg>
+        Connect Wallet
+      </button>
+      <div class="wallet-connected-badge" id="wallet-info-bar" style="display:none;">
+        <span class="wallet-dot"></span>
+        <span id="wallet-address-display">0x00...0000</span>
+        <span style="margin: 0 0.5rem; color: var(--glass-border);">|</span>
+        <span id="wallet-balance-display">0.00 GEN</span>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Toggle Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <main class="main-content">
+    <div class="container">
+      <section class="hero">
+        <div class="hero-text">
+          <div class="badge">
+            <span class="wallet-dot"></span> Powered by GenLayer Intelligent Contracts
+          </div>
+          <h1 class="hero-title">Decentralizing Trust in <span>Ophthalmology</span></h1>
+          <p class="hero-description">
+            Ophthalmic advice and eye care myths are everywhere. IRISYN is a decentralized consensus registry where researchers stake tokens to propose claims and back them with peer-reviewed medical publications. AI nodes verify evidence URLs in real-time using the Equivalence Principle to curb visual health misinformation.
+          </p>
+          <div class="hero-actions">
+            <a href="registry.html" class="btn btn-primary">
+              Explore Registry
+              <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 24 24">
+                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+              </svg>
+            </a>
+            <a href="anatomy.html" class="btn btn-secondary">Learn Eye Anatomy</a>
+          </div>
+        </div>
+        
+        <div class="hero-visual">
+          <div class="eye-interactive-graphic">
+            <div class="eye-outer-ring"></div>
+            <div class="eye-iris">
+              <div class="eye-pupil">
+                <div class="eye-reflection"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats Banner -->
+      <section class="glass-card stats-banner" style="margin-bottom: 5rem;">
+        <div class="stat-item">
+          <div class="stat-number" id="stat-total-claims">0</div>
+          <div class="stat-label">Verified Statements</div>
+        </div>
+        <div class="stat-item" style="border-left: 1px solid var(--glass-border); border-right: 1px solid var(--glass-border);">
+          <div class="stat-number" id="stat-rewards-pool">0 GEN</div>
+          <div class="stat-label">Rewards Paid</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="stat-accuracy-rate">100%</div>
+          <div class="stat-label">Consensus Fidelity</div>
+        </div>
+      </section>
+
+      <!-- How it Works & Features -->
+      <section>
+        <h2 style="font-size: 2.25rem; text-align: center; margin-bottom: 1rem;">Why Irisyn Matters</h2>
+        <p style="text-align: center; max-width: 700px; margin: 0 auto 4rem auto; color: var(--dark-gray);">
+          By matching decentralization with non-deterministic LLM consensus, Irisyn solves the trust gap in online medical databases.
+        </p>
+
+        <div class="features-grid">
+          <div class="glass-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Authoritative Validation</h3>
+            <p class="feature-desc">Claims are cross-checked against peer-reviewed articles (PubMed, NIH/NEI, WHO, AAO) fetched live via non-deterministic contract nodes.</p>
+          </div>
+
+          <div class="glass-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Financial Incentives</h3>
+            <p class="feature-desc">Proposers stake 1 GEN. If the verification consensus confirms their status, they double their stake. Incorrect proposals are slashed and burned.</p>
+          </div>
+
+          <div class="glass-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Optimistic Democracy</h3>
+            <p class="feature-desc">Consensus is governed by GenLayer's unique protocol. Multiple independent validator nodes run queries, reaching democratic agreement.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer style="margin-top: 5rem; border-top: 1px solid var(--glass-border); padding: 2rem 0; text-align: center; color: var(--mid-gray); font-size: 0.9rem;">
+    <div class="container">
+      <p>© 2026 IRISYN Fact Registry. Built on GenLayer Studio. Designed for Ophthalmology Trust.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="genlayer_bundle.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load stats on landing page
+      setTimeout(async () => {
+        if (window.readGenLayer) {
+          try {
+            const rawStats = await window.readGenLayer(CONTRACT_ADDRESS, 'get_stats', []);
+            const stats = typeof rawStats === 'string' ? JSON.parse(rawStats) : rawStats;
+            if (stats) {
+              const elClaims = document.getElementById('stat-total-claims');
+              const elPool = document.getElementById('stat-rewards-pool');
+              if (elClaims) animateCounter(elClaims, parseInt(stats.total_claims || 0));
+              if (elPool && stats.pending_rewards_wei) {
+                const ethVal = parseFloat(stats.pending_rewards_wei) / 1e18;
+                elPool.textContent = `${ethVal.toFixed(2)} GEN`;
+              }
+            }
+          } catch(e) {
+            console.warn("Could not load stats on home page:", e);
+          }
+        }
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

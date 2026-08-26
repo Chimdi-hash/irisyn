@@ -1,0 +1,16 @@
+{
+  "name": "irisyn",
+  "version": "1.0.0",
+  "description": "IRISYN — Decentralized Eye Health Fact Registry on GenLayer Studio",
+  "private": true,
+  "keywords": ["genlayer", "web3", "ophthalmology", "eye-health", "blockchain", "ai"],
+  "homepage": ".",
+  "scripts": {
+    "dev": "npx serve . -l 3000",
+    "start": "npx serve . -l 3000",
+    "build": "echo 'Static site — no build step needed'"
+  },
+  "devDependencies": {
+    "serve": "^14.2.3"
+  }
+}

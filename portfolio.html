@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investigator Panel — IRISYN | GenLayer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background Particles -->
+  <div class="particle-container" id="particle-field"></div>
+  <div class="floating-orb orb-sky-1" style="opacity: 0.5;"></div>
+  <div class="floating-orb orb-sky-3" style="opacity: 0.5;"></div>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="6" fill="none" opacity="0.3"/>
+        <circle cx="50" cy="50" r="22" stroke="currentColor" stroke-width="4" fill="none"/>
+        <circle cx="50" cy="50" r="10" fill="currentColor"/>
+        <path d="M15 50 Q50 15 85 50" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M15 50 Q50 85 85 50" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+      IRISYN<span>.</span>
+    </a>
+    
+    <ul class="nav-links" id="nav-links">
+      <li><a href="index.html" class="nav-link">Home</a></li>
+      <li><a href="registry.html" class="nav-link">Fact Registry</a></li>
+      <li><a href="anatomy.html" class="nav-link">Anatomy Guide</a></li>
+      <li><a href="portfolio.html" class="nav-link active">Investigator Panel</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="btn btn-wallet" id="connect-wallet-btn">Connect Wallet</button>
+      <div class="wallet-connected-badge" id="wallet-info-bar" style="display:none;">
+        <span class="wallet-dot"></span>
+        <span id="wallet-address-display">0x00...0000</span>
+        <span style="margin: 0 0.5rem; color: var(--glass-border);">|</span>
+        <span id="wallet-balance-display">0.00 GEN</span>
+      </div>
+      <button class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      
+      <div style="margin-bottom: 2.5rem;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Investigator Workspace</h1>
+        <p style="color:var(--dark-gray);">Manage your verified statements, track staking rewards, and claim your payouts.</p>
+      </div>
+
+      <!-- Stats Summary -->
+      <section class="portfolio-header-summary">
+        <div class="glass-card portfolio-stat-card">
+          <div class="portfolio-stat-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+            </svg>
+          </div>
+          <div>
+            <div style="font-size:0.8rem; font-weight:700; color:var(--mid-gray); text-transform:uppercase; letter-spacing:0.05em;">Your Wallet Balance</div>
+            <div style="font-size:1.5rem; font-weight:800; font-family:var(--font-display);" id="portfolio-wallet-balance">0.00 GEN</div>
+          </div>
+        </div>
+
+        <div class="glass-card portfolio-stat-card">
+          <div class="portfolio-stat-icon" style="color: var(--verified-color); background: var(--verified-bg);">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/>
+            </svg>
+          </div>
+          <div>
+            <div style="font-size:0.8rem; font-weight:700; color:var(--mid-gray); text-transform:uppercase; letter-spacing:0.05em;">Proposals Submitted</div>
+            <div style="font-size:1.5rem; font-weight:800; font-family:var(--font-display);" id="portfolio-claims-submitted">0</div>
+          </div>
+        </div>
+
+        <div class="glass-card portfolio-stat-card">
+          <div class="portfolio-stat-icon" style="color: var(--unverified-color); background: var(--unverified-bg);">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+            </svg>
+          </div>
+          <div>
+            <div style="font-size:0.8rem; font-weight:700; color:var(--mid-gray); text-transform:uppercase; letter-spacing:0.05em;">Pending Staking Payouts</div>
+            <div style="font-size:1.5rem; font-weight:800; font-family:var(--font-display);" id="portfolio-pending-rewards">0.00 GEN</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- History Table -->
+      <section class="glass-card" style="margin-bottom: 3rem;">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Verification Proposal History</h2>
+        
+        <div class="table-responsive">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Statement Title</th>
+                <th>Condition</th>
+                <th>Result Classification</th>
+                <th>Staking Outcome</th>
+                <th>Consensus Review</th>
+              </tr>
+            </thead>
+            <tbody id="portfolio-history-rows">
+              <tr>
+                <td colspan="5" style="text-align: center; padding: 3rem 1rem; color: var(--mid-gray);">
+                  Please connect your wallet to view your submission history.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Withdrawal Card -->
+      <section class="withdraw-section">
+        <div class="withdraw-text">
+          <h3 class="withdraw-title">Withdraw Staking Rewards</h3>
+          <p class="withdraw-desc">
+            Accumulated staking rewards are held securely in the smart contract ledger. Initiating a withdrawal executes a direct native transfer to your connected MetaMask address. Note: This requires gas.
+          </p>
+        </div>
+        <button class="btn btn-primary" id="btn-claim-rewards" onclick="withdrawRewards()" style="padding: 1rem 2rem; font-size: 1.05rem;" disabled>
+          Claim Payout (0.00 GEN)
+        </button>
+      </section>
+
+    </div>
+  </main>
+
+  <footer style="margin-top: 5rem; border-top: 1px solid var(--glass-border); padding: 2rem 0; text-align: center; color: var(--mid-gray); font-size: 0.9rem;">
+    <div class="container">
+      <p>© 2026 IRISYN Fact Registry. Built on GenLayer Studio.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="genlayer_bundle.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

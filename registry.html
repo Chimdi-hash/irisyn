@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fact Registry — IRISYN Eye Health Facts | GenLayer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Floating Particles Background -->
+  <div class="particle-container" id="particle-field"></div>
+  <div class="floating-orb orb-sky-1" style="opacity: 0.5;"></div>
+  <div class="floating-orb orb-sky-2" style="opacity: 0.5;"></div>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="6" fill="none" opacity="0.3"/>
+        <circle cx="50" cy="50" r="22" stroke="currentColor" stroke-width="4" fill="none"/>
+        <circle cx="50" cy="50" r="10" fill="currentColor"/>
+        <path d="M15 50 Q50 15 85 50" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M15 50 Q50 85 85 50" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+      IRISYN<span>.</span>
+    </a>
+    
+    <ul class="nav-links" id="nav-links">
+      <li><a href="index.html" class="nav-link">Home</a></li>
+      <li><a href="registry.html" class="nav-link active">Fact Registry</a></li>
+      <li><a href="anatomy.html" class="nav-link">Anatomy Guide</a></li>
+      <li><a href="portfolio.html" class="nav-link">Investigator Panel</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="btn btn-wallet" id="connect-wallet-btn">Connect Wallet</button>
+      <div class="wallet-connected-badge" id="wallet-info-bar" style="display:none;">
+        <span class="wallet-dot"></span>
+        <span id="wallet-address-display">0x00...0000</span>
+        <span style="margin:0 0.5rem;color:var(--glass-border);">|</span>
+        <span id="wallet-balance-display">0.00 GEN</span>
+      </div>
+      <button class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Body -->
+  <main class="main-content">
+    <div class="container">
+      
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom: 2.5rem;gap: 1.5rem;flex-wrap: wrap;">
+        <div>
+          <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Visual Trust Database</h1>
+          <p style="color:var(--dark-gray); max-width:600px;">
+            Search and check common eye care claims, medical facts, and myths registered on-chain.
+          </p>
+        </div>
+        <button class="btn btn-primary" onclick="openProposalPanel()">
+          <svg style="width:20px;height:20px;fill:currentColor;" viewBox="0 0 24 24">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+          Verify a New Claim
+        </button>
+      </div>
+
+      <!-- Search & Filters -->
+      <section class="glass-card" style="padding: 1.5rem; margin-bottom: 2.5rem;">
+        <div class="search-bar-container">
+          <input type="text" class="search-input" id="registry-search" placeholder="Search statements (e.g., Castor Oil, Macular, cataracts)..." oninput="handleSearch()">
+        </div>
+        
+        <div class="filter-categories" id="filter-container">
+          <div class="filter-chip active" data-condition="all">All Conditions</div>
+          <div class="filter-chip" data-condition="cataracts">Cataracts</div>
+          <div class="filter-chip" data-condition="glaucoma">Glaucoma</div>
+          <div class="filter-chip" data-condition="myopia">Myopia / Refractive</div>
+          <div class="filter-chip" data-condition="dry eye">Dry Eye</div>
+          <div class="filter-chip" data-condition="macular degeneration">Macular Degeneration</div>
+          <div class="filter-chip" data-condition="general">General Eye Health</div>
+        </div>
+      </section>
+
+      <!-- Registry Grid -->
+      <section>
+        <div class="claims-grid" id="claims-display-grid">
+          <!-- Dynamically filled -->
+          <div class="glass-card" style="grid-column: 1/-1; text-align: center; padding: 4rem 2rem;">
+            <svg style="width:64px;height:64px;fill:var(--mid-gray);margin-bottom:1.5rem;" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+            <h3>Connecting to the GenLayer Registry...</h3>
+            <p style="color:var(--mid-gray);margin-top:0.5rem;">Make sure your wallet is active and connected to GenLayer Studio Network.</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Backdrop for Sliding Panel -->
+  <div class="sliding-panel-backdrop" id="panel-backdrop" onclick="closeProposalPanel()"></div>
+
+  <!-- SLIDING GLASSMORPHISM PANEL (Drawer) -->
+  <div class="sliding-panel" id="proposal-panel">
+    
+    <!-- State 1: Claim Submission Form -->
+    <div id="panel-state-form" style="display:flex; flex-direction:column; height:100%;">
+      <div class="panel-header">
+        <h2>Submit Fact Verification</h2>
+        <button class="close-panel-btn" onclick="closeProposalPanel()">✕</button>
+      </div>
+
+      <div style="flex-grow:1;">
+        <div class="form-group">
+          <label class="form-label" for="claim-title">Claim Title</label>
+          <input type="text" class="form-input" id="claim-title" placeholder="e.g., Castor Oil for Cataracts">
+          <p class="form-tip">Provide a short, distinct title for the visual statement.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="claim-condition">Target Eye Condition</label>
+          <select class="form-select" id="claim-condition">
+            <option value="General">General Eye Health</option>
+            <option value="Cataracts">Cataracts</option>
+            <option value="Glaucoma">Glaucoma</option>
+            <option value="Myopia">Myopia / Refractive Errors</option>
+            <option value="Dry Eye">Dry Eye</option>
+            <option value="Macular Degeneration">Macular Degeneration</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="claim-status">Proposed Classification</label>
+          <select class="form-select" id="claim-status">
+            <option value="VERIFIED">VERIFIED (Proven & Medically Sound)</option>
+            <option value="DEBUNKED">DEBUNKED (Scientifically False/Unsafe)</option>
+            <option value="UNVERIFIED">UNVERIFIED (Lacks conclusive clinical trials)</option>
+          </select>
+          <p class="form-tip">Assess the statement's validity before proposing to avoid slashing.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="claim-url">Evidence Citation URL</label>
+          <input type="url" class="form-input" id="claim-url" placeholder="https://pubmed.ncbi.nlm.nih.gov/...">
+          <p class="form-tip">Must point to a scientific publication, medical journal, or clinical guideline.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="claim-text">Full Claim Details</label>
+          <textarea class="form-textarea" id="claim-text" placeholder="Detail the medical claim, dosage, treatment method, or belief being analyzed..."></textarea>
+        </div>
+
+        <div class="stake-info-box">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+          </svg>
+          <div>
+            <h4 class="stake-info-title">GenLayer Staking Rule</h4>
+            <p class="stake-info-text">Proposing requires a stake of 1.00 GEN. If the AI consensus validates your classification, you earn a 1.00 GEN reward (2.00 GEN return). Slashed stakes are permanently burned.</p>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btn-submit-proposal" onclick="submitClaimProposal()" style="width:100%;">
+        Stake 1 GEN & Propose Verification
+      </button>
+    </div>
+
+    <!-- State 2: Transaction & Consensus Loader -->
+    <div id="panel-state-loading" style="display:none; height:100%;">
+      <div class="consensus-visualizer">
+        <div class="iris-scanner">
+          <div class="scanner-ring"></div>
+          <div class="scanner-beam"></div>
+          <div class="scanner-eye">
+            <div class="scanner-pupil"></div>
+          </div>
+        </div>
+        
+        <h3 id="loading-title">Initiating Fact Scan</h3>
+        <p id="loading-subtitle" style="color:var(--mid-gray); margin-top:0.5rem; font-size:0.9rem;">Sign the MetaMask transaction...</p>
+        
+        <div class="consensus-steps">
+          <div class="consensus-step active" id="step-tx">
+            <div class="step-indicator">1</div>
+            <div>Sign & Stake (MetaMask)</div>
+          </div>
+          <div class="consensus-step" id="step-scrape">
+            <div class="step-indicator">2</div>
+            <div>Scrape Citation Document</div>
+          </div>
+          <div class="consensus-step" id="step-consensus">
+            <div class="step-indicator">3</div>
+            <div>Validator Consensus Running</div>
+          </div>
+          <div class="consensus-step" id="step-finalize">
+            <div class="step-indicator">4</div>
+            <div>Finalizing On-Chain State</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 3: Consensus Result Display -->
+    <div id="panel-state-result" style="display:none; height:100%; flex-direction:column;">
+      <div class="panel-header">
+        <h2>Scan Complete</h2>
+        <button class="close-panel-btn" onclick="closeProposalPanel()">✕</button>
+      </div>
+
+      <div style="flex-grow:1; overflow-y:auto; padding-right:0.5rem;">
+        <div class="result-card-details">
+          
+          <div class="result-card-remark" id="result-remark-container">
+            <!-- Dynamic remark with warning/success styling -->
+            <span id="result-status-text">DEBUNKED</span>
+          </div>
+
+          <div>
+            <h4 class="form-label">Claim Title</h4>
+            <h3 style="font-size:1.35rem;" id="result-title">Castor Oil for Cataracts</h3>
+          </div>
+
+          <div>
+            <h4 class="form-label">Consensus Medical Remark</h4>
+            <p id="result-remark-text" style="font-weight: 500; font-size:0.95rem;"></p>
+          </div>
+
+          <div>
+            <h4 class="form-label">Validation Reasoning</h4>
+            <p id="result-reasoning" style="font-size:0.9rem; color:var(--dark-gray);"></p>
+          </div>
+
+          <div id="result-facts-container">
+            <h4 class="form-label">Key Medical Facts</h4>
+            <ul class="result-list-facts" id="result-facts-list">
+              <li>Fact 1</li>
+              <li>Fact 2</li>
+            </ul>
+          </div>
+
+          <div id="result-anatomy-container">
+            <h4 class="form-label">Anatomical Targets</h4>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.25rem;" id="result-anatomy-list">
+              <span class="claim-condition-badge">Lens</span>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="form-label">Clinical Relevance</h4>
+            <p id="result-relevance" style="font-size:0.9rem; color:var(--dark-gray);"></p>
+          </div>
+          
+          <div>
+            <h4 class="form-label">Evidence Citation</h4>
+            <a href="#" id="result-citation-url" target="_blank" class="claim-source-link">PubMed Reference</a>
+          </div>
+
+        </div>
+      </div>
+
+      <button class="btn btn-secondary" onclick="resetFormState()" style="width:100%; margin-top:1.5rem;">
+        Verify Another Claim
+      </button>
+    </div>
+
+  </div>
+
+  <footer style="margin-top: 5rem; border-top: 1px solid var(--glass-border); padding: 2rem 0; text-align: center; color: var(--mid-gray); font-size: 0.9rem;">
+    <div class="container">
+      <p>© 2026 IRISYN Fact Registry. Built on GenLayer Studio.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="genlayer_bundle.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
