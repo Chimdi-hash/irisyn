@@ -182,6 +182,38 @@
           }
         }
       }, 1000);
+
+      // Cursor eyeball tracking animation
+      const hero = document.querySelector('.hero');
+      const eye = document.querySelector('.eye-interactive-graphic');
+      const iris = document.querySelector('.eye-iris');
+      
+      if (hero && eye && iris) {
+        iris.style.transition = 'transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        
+        window.addEventListener('mousemove', (e) => {
+          const rect = eye.getBoundingClientRect();
+          const eyeX = rect.left + rect.width / 2;
+          const eyeY = rect.top + rect.height / 2;
+          
+          const deltaX = e.clientX - eyeX;
+          const deltaY = e.clientY - eyeY;
+          
+          const angle = Math.atan2(deltaY, deltaX);
+          const maxMove = 25; 
+          const rawDist = Math.hypot(deltaX, deltaY);
+          const moveDist = Math.min(maxMove, rawDist / 12);
+          
+          const x = Math.cos(angle) * moveDist;
+          const y = Math.sin(angle) * moveDist;
+          
+          iris.style.transform = `translate(${x}px, ${y}px)`;
+        });
+        
+        document.addEventListener('mouseleave', () => {
+          iris.style.transform = 'translate(0, 0)';
+        });
+      }
     });
   </script>
 </body>
