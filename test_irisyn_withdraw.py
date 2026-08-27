@@ -64,6 +64,24 @@ def test_irisyn_staking_rewards_and_burning(direct_deploy, direct_vm, direct_ali
         assert cached["explanation"]["status"] == "VERIFIED"
         assert cached["explanation"]["remark"] == "Medically Validated Fact - Supported by peer-reviewed evidence."
 
+        # Verify reward cap: Alice submits a second valid claim but with 5 GEN stake
+        evidence_url_3 = "https://pubmed.ncbi.nlm.nih.gov/345678"
+        direct_vm.mock_web(evidence_url_3, {"body": "Studies show sunglasses block harmful UV rays and prevent macular damage.", "method": "GET", "status": 200})
+
+        with direct_vm.prank(direct_alice):
+            direct_vm.value = 5 * 10**18
+            contract.propose_claim(
+                "UV Sunglasses Protection Part 2",
+                "Sunglasses with UV block prevent cataract progression and retina damage.",
+                "Cataracts",
+                "VERIFIED",
+                evidence_url_3
+            )
+
+        # Alice should have: 2 GEN (first claim) + 5 GEN (refund of second stake) + 1 GEN (standard reward cap) = 8 GEN
+        # If it were uncapped 2x stake, she would have 2 GEN + 10 GEN = 12 GEN.
+        assert int(contract.pending_rewards.get(alice_str, "0")) == 8 * 10**18
+
         # ── Test Case 2: Invalid Fact Proposal (Bob is Incorrect -> Slashed and Burned) ──
         evidence_url_2 = "https://pubmed.ncbi.nlm.nih.gov/789012"
         direct_vm.mock_web(evidence_url_2, {"body": "Scientific consensus rejects staring at the sun; it causes immediate solar retinopathy and blindness.", "method": "GET", "status": 200})
