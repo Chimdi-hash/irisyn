@@ -28,6 +28,7 @@ class IrisynRegistry(gl.Contract):
     user_history:     TreeMap[str, str]   # lower(address) -> JSON history of submissions
     pending_rewards:  TreeMap[str, str]   # lower(address) -> wei reward balance
     total_pending_rewards: str            # Global outstanding reward obligations
+    total_rewards_paid: str               # Global total rewards claimed/withdrawn
     total_claims:     u256                # Registered claims counter
     condition_index:  TreeMap[str, str]   # lower(condition) -> JSON list of claim_ids
     recent_claims_list: str               # JSON list of recent claim_ids
@@ -35,6 +36,7 @@ class IrisynRegistry(gl.Contract):
     def __init__(self):
         self.total_claims = u256(0)
         self.total_pending_rewards = "0"
+        self.total_rewards_paid = "0"
         self.recent_claims_list = json.dumps([])
 
     # ── Helpers ───────────────────────────────────────────────────
@@ -194,8 +196,8 @@ Return ONLY a valid JSON object (no markdown, no extra explanation text):
         stake_int = int(stake)
 
         if is_status_correct:
-            # Proposer correctly classified the claim -> Reward 2x stake
-            reward_wei = stake_int * 2
+            # Proposer correctly classified the claim -> Refund of stake + standard 1 GEN reward
+            reward_wei = stake_int + ONE_GEN
             
             # Track the reward
             current = int(self.pending_rewards.get(caller_str, "0"))
@@ -264,6 +266,9 @@ Return ONLY a valid JSON object (no markdown, no extra explanation text):
         current_total = int(self.total_pending_rewards)
         self.total_pending_rewards = str(current_total - pending_amount)
         
+        current_paid = int(self.total_rewards_paid)
+        self.total_rewards_paid = str(current_paid + pending_amount)
+        
         # Emit transfer
         _Recipient(caller).emit_transfer(value=u256(pending_amount), on='finalized')
 
@@ -296,7 +301,8 @@ Return ONLY a valid JSON object (no markdown, no extra explanation text):
             "platform": "IRISYN",
             "network": "GenLayer Studio",
             "treasury_wei": str(current_balance),
-            "pending_rewards_wei": self.total_pending_rewards
+            "pending_rewards_wei": self.total_pending_rewards,
+            "rewards_paid_wei": self.total_rewards_paid
         })
 
     @gl.public.view

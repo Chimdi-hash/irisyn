@@ -185,8 +185,8 @@
               const elClaims = document.getElementById('stat-total-claims');
               const elPool = document.getElementById('stat-rewards-pool');
               if (elClaims) animateCounter(elClaims, parseInt(stats.total_claims || 0));
-              if (elPool && stats.pending_rewards_wei) {
-                const ethVal = parseFloat(stats.pending_rewards_wei) / 1e18;
+              if (elPool && stats.rewards_paid_wei !== undefined) {
+                const ethVal = parseFloat(stats.rewards_paid_wei) / 1e18;
                 elPool.textContent = `${ethVal.toFixed(2)} GEN`;
               }
             }
