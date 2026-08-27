@@ -145,6 +145,49 @@ def test_irisyn_staking_rewards_and_burning(direct_deploy, direct_vm, direct_ali
         )
         assert found_payout, "Rewards payout transfer was not emitted."
 
+        # ── Test Case 4: Challenge Mode (Bob Challenges UV Sunglasses Protection to be DEBUNKED) ──
+        # Currently UV Sunglasses Protection is VERIFIED.
+        # Bob proposes to change it to DEBUNKED.
+        # Mock LLM to accept Bob's challenge
+        challenge_consensus_json = json.dumps({
+            "is_status_correct": True,
+            "consensus_status": "DEBUNKED",
+            "consensus_remark": "Challenge Accepted - Updated to DEBUNKED by Bob.",
+            "reasoning": "New evidence disproves previous validation.",
+            "clinical_relevance": "Prevents false safety claims.",
+            "anatomy_involved": ["Lens", "Retina"],
+            "key_medical_facts": ["UV damage is still real, but the specific claimed sunglasses protection is flawed."]
+        })
+
+        gl.eq_principle.prompt_non_comparative = lambda prompt, task, criteria: challenge_consensus_json
+
+        # Get total claims before challenge
+        total_claims_before = int(contract.total_claims)
+
+        # Bob proposes the challenge with 1 GEN stake
+        with direct_vm.prank(direct_bob):
+            direct_vm.value = 1 * 10**18
+            contract.propose_claim(
+                "UV Sunglasses Protection", # Same title as Alice's claim
+                "Sunglasses with UV block prevent cataract progression and retina damage.",
+                "Cataracts",
+                "DEBUNKED", # Challenging the VERIFIED status
+                evidence_url_2
+            )
+
+        # Verify Bob's rewards is set to 2 GEN (refund + 1 GEN reward cap)
+        assert int(contract.pending_rewards.get(bob_str, "0")) == 2 * 10**18
+
+        # Verify claim in cache has been updated to DEBUNKED and proposer is Bob
+        cached_str_updated = contract.get_cached_claim("UV Sunglasses Protection")
+        cached_updated = json.loads(cached_str_updated)
+        assert cached_updated["explanation"]["status"] == "DEBUNKED"
+        assert cached_updated["explanation"]["remark"] == "Challenge Accepted - Updated to DEBUNKED by Bob."
+        assert cached_updated["proposer"] == bob_str
+
+        # Verify that total_claims did NOT increase (remains identical)
+        assert int(contract.total_claims) == total_claims_before
+
     finally:
         if original_prompt:
             gl.eq_principle.prompt_non_comparative = original_prompt

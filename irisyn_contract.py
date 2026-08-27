@@ -81,8 +81,18 @@ class IrisynRegistry(gl.Contract):
 
         claim_id = self._normalize_str(clean_title)
 
+        is_challenge = False
+        existing_status = ""
         if claim_id in self.claims_registry:
-            raise Exception(f"A claim with the title '{clean_title}' is already registered in Irisyn.")
+            is_challenge = True
+            try:
+                existing_claim = json.loads(self.claims_registry[claim_id])
+                existing_status = existing_claim["explanation"]["status"].strip().upper()
+            except Exception:
+                existing_status = ""
+            
+            if clean_status == existing_status:
+                raise Exception(f"This claim is already registered in the registry with status '{existing_status}'. To challenge it, you must propose a different classification status.")
 
         # Check treasury balance to back the potential 2x reward (stake + 1 GEN reward)
         try:
@@ -102,6 +112,18 @@ class IrisynRegistry(gl.Contract):
             except Exception as e:
                 web_data = f"[Scraping Error: The citation URL returned a loading error or blocked the automated request (e.g. 403 Forbidden). Technical details: {str(e)}]"
             
+            challenge_section = ""
+            if is_challenge:
+                challenge_section = f"""
+*** CHALLENGE MODE ACTIVE ***
+This proposal is a formal CHALLENGE to an already registered claim in the database.
+Current Registered Classification Status: "{existing_status}"
+Challenger's Proposed Update Status: "{clean_status}"
+Challenger's Evidence URL: "{clean_url}"
+
+Your job is to determine if the challenger's proposed status "{clean_status}" is the correct classification for this claim, superseding the old status of "{existing_status}". Set "is_status_correct" to true ONLY if the challenger's status "{clean_status}" is indeed the correct scientific/medical classification and the registry should be updated.
+"""
+
             return f"""You are a professional, authoritative scientific fact-checker for the IRISYN Eye Health Facts Registry.
 Your task is to evaluate a proposed eye health claim and its proposed medical status against a provided evidence URL and general ophthalmology consensus.
 
@@ -110,6 +132,7 @@ Claim Details: "{clean_text}"
 Ophthalmic Condition: "{clean_condition}"
 Proposed Classification Status: "{clean_status}"
 Evidence Citation URL: "{clean_url}"
+{challenge_section}
 
 --- EVIDENCE WEBPAGE RAW CONTENT ---
 {web_data}
@@ -238,7 +261,8 @@ Return ONLY a valid JSON object (no markdown, no extra explanation text):
                 self.recent_claims_list = json.dumps(recent)
 
             self._record(caller_str, claim_id, clean_title, consensus_status, consensus_remark, True)
-            self.total_claims += 1
+            if not is_challenge:
+                self.total_claims += 1
         else:
             # Proposer was incorrect or spamming -> Burn the stake to null address
             _Recipient(Address("0x0000000000000000000000000000000000000000")).emit_transfer(value=u256(stake_int), on='finalized')
