@@ -94,8 +94,11 @@ class IrisynRegistry(gl.Contract):
 
         # ── AI Validation Prompt via Equivalence Principle ──
         def build_prompt() -> str:
-            # Fetch the actual web page content inside the non-deterministic block
-            web_data = gl.nondet.web.render(clean_url, mode='text')
+            # Fetch the actual web page content inside the non-deterministic block with fallback handling
+            try:
+                web_data = gl.nondet.web.render(clean_url, mode='text')
+            except Exception as e:
+                web_data = f"[Scraping Error: The citation URL returned a loading error or blocked the automated request (e.g. 403 Forbidden). Technical details: {str(e)}]"
             
             return f"""You are a professional, authoritative scientific fact-checker for the IRISYN Eye Health Facts Registry.
 Your task is to evaluate a proposed eye health claim and its proposed medical status against a provided evidence URL and general ophthalmology consensus.
@@ -112,6 +115,7 @@ Evidence Citation URL: "{clean_url}"
 
 VALIDATION INSTRUCTIONS:
 1. Analyze the evidence page content. Check if the URL is a reputable medical source (e.g., .gov, .org, .edu, reputable medical journals, AAO.org, WHO, NIH/NEI).
+   *NOTE: If the webpage content indicates a [Scraping Error], rely on your internal clinical knowledge base in ophthalmology to verify or debunk the claim based on standard medical consensus, while still verifying the credibility of the domain name in the URL.*
 2. Assess if the proposed claim is scientifically accurate regarding the human eye, eye health, medical science, and visual hygiene.
 3. Compare the proposed classification status ("VERIFIED", "DEBUNKED", or "UNVERIFIED") with what the source states and general ophthalmology consensus:
    - VERIFIED: The claim is scientifically proven, safe, and supported by peer-reviewed evidence and standard eye care guidelines.
