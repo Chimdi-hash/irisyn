@@ -159,7 +159,7 @@ VALIDATION INSTRUCTIONS:
 6. Provide a detailed "reasoning" from the webpage, a "clinical_relevance" for eye health, list the eye structures involved (e.g., "Cornea", "Lens", "Retina", "Optic Nerve", "Macula") in "anatomy_involved", and extract 2-3 "key_medical_facts".
 
 Return ONLY a valid JSON object matching this schema:
-{
+{{
     "is_status_correct": false,
     "consensus_status": "DEBUNKED",
     "consensus_remark": "Remark detailing the classification outcome and general medical advice.",
@@ -167,7 +167,7 @@ Return ONLY a valid JSON object matching this schema:
     "clinical_relevance": "Ophthalmological explanation of how this claim affects vision or optical health.",
     "anatomy_involved": [],
     "key_medical_facts": []
-}
+}}
 """
 
         result_str = gl.eq_principle.prompt_non_comparative(
