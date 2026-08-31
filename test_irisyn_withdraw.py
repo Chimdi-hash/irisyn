@@ -51,7 +51,7 @@ def test_irisyn_staking_rewards_and_burning(direct_deploy, direct_vm, direct_ali
     # Mock the LLM consensus
     import genlayer.gl as gl
     original_prompt = getattr(gl.eq_principle, 'prompt_non_comparative', None)
-    gl.eq_principle.prompt_non_comparative = lambda prompt, task, criteria, output_type=None: ConsensusResponse(**json.loads(correct_consensus_json))
+    gl.eq_principle.prompt_non_comparative = lambda prompt, task, criteria: correct_consensus_json
 
     try:
         # Alice proposes a correct claim with 1 GEN stake
@@ -110,7 +110,7 @@ def test_irisyn_staking_rewards_and_burning(direct_deploy, direct_vm, direct_ali
         })
 
         # Mock the LLM consensus to return incorrect verification
-        gl.eq_principle.prompt_non_comparative = lambda prompt, task, criteria, output_type=None: ConsensusResponse(**json.loads(incorrect_consensus_json))
+        gl.eq_principle.prompt_non_comparative = lambda prompt, task, criteria: incorrect_consensus_json
 
         # Clear traces before transaction
         direct_vm._traces.clear()
@@ -172,7 +172,7 @@ def test_irisyn_staking_rewards_and_burning(direct_deploy, direct_vm, direct_ali
             "key_medical_facts": ["UV damage is still real, but the specific claimed sunglasses protection is flawed."]
         })
 
-        gl.eq_principle.prompt_non_comparative = lambda prompt, task, criteria, output_type=None: ConsensusResponse(**json.loads(challenge_consensus_json))
+        gl.eq_principle.prompt_non_comparative = lambda prompt, task, criteria: challenge_consensus_json
 
         # Get total claims before challenge
         total_claims_before = int(contract.total_claims)

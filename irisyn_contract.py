@@ -157,31 +157,49 @@ VALIDATION INSTRUCTIONS:
    - DEBUNKED: The claim is medically false, disproven, ineffective, dangerous, or a known myth.
    - UNVERIFIED: The claim lacks sufficient clinical trials, has conflicting studies, or is an unproven hypothesis.
 6. Provide a detailed "reasoning" from the webpage, a "clinical_relevance" for eye health, list the eye structures involved (e.g., "Cornea", "Lens", "Retina", "Optic Nerve", "Macula") in "anatomy_involved", and extract 2-3 "key_medical_facts".
+
+Return ONLY a valid JSON object matching this schema:
+{
+    "is_status_correct": false,
+    "consensus_status": "DEBUNKED",
+    "consensus_remark": "Remark detailing the classification outcome and general medical advice.",
+    "reasoning": "Detailed breakdown comparing the claim to the citation text.",
+    "clinical_relevance": "Ophthalmological explanation of how this claim affects vision or optical health.",
+    "anatomy_involved": [],
+    "key_medical_facts": []
+}
 """
 
-        data_obj = gl.eq_principle.prompt_non_comparative(
+        result_str = gl.eq_principle.prompt_non_comparative(
             build_prompt,
             task="Fact-check the proposed eye health claim using the evidence URL.",
             criteria=(
-                "The consensus MUST strictly type the output. The 'is_status_correct' flag, "
+                "The consensus MUST strictly output JSON. The 'is_status_correct' flag, "
                 "proposed classification, stored status, and source-grounded reasoning MUST "
                 "logically agree. Independent corroboration from recognized medical sources "
                 "MUST be performed."
-            ),
-            output_type=ConsensusResponse
+            )
         )
 
         # ── Parse AI output ──
         try:
-            data = {
-                "is_status_correct": data_obj.is_status_correct,
-                "consensus_status": data_obj.consensus_status,
-                "consensus_remark": data_obj.consensus_remark,
-                "reasoning": data_obj.reasoning,
-                "clinical_relevance": data_obj.clinical_relevance,
-                "anatomy_involved": data_obj.anatomy_involved,
-                "key_medical_facts": data_obj.key_medical_facts
-            }
+            cleaned = result_str.strip()
+            if "```" in cleaned:
+                s = cleaned.find("{"); e = cleaned.rfind("}") + 1
+                if s >= 0 and e > s:
+                    cleaned = cleaned[s:e]
+            data_dict = json.loads(cleaned)
+            # Strictly type and enforce schema structure natively
+            data_obj = ConsensusResponse(
+                is_status_correct=bool(data_dict.get("is_status_correct", False)),
+                consensus_status=str(data_dict.get("consensus_status", "UNVERIFIED")),
+                consensus_remark=str(data_dict.get("consensus_remark", "")),
+                reasoning=str(data_dict.get("reasoning", "")),
+                clinical_relevance=str(data_dict.get("clinical_relevance", "")),
+                anatomy_involved=list(data_dict.get("anatomy_involved", [])),
+                key_medical_facts=list(data_dict.get("key_medical_facts", []))
+            )
+            data = dataclasses.asdict(data_obj)
         except Exception:
             data = {}
 
