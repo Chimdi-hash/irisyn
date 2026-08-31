@@ -462,16 +462,7 @@ async function submitClaimProposal() {
   try {
     if (!window.callGenLayer) throw new Error('GenLayer Web3 SDK not loaded.');
 
-    // Pre-check if claim title already exists (free view read)
-    try {
-      const exists = await window.readGenLayer(CONTRACT_ADDRESS, 'get_cached_claim', [title]);
-      const data = typeof exists === 'string' ? JSON.parse(exists) : exists;
-      if (data && data.explanation) {
-        showToast('Claim already exists! Showing cached record.', 'info');
-        renderConsensusResult(data.explanation);
-        return;
-      }
-    } catch(e) { console.warn('Precheck view call failed (non-fatal)', e); }
+    // Let the contract handle existing claims via Challenge Mode
 
     // Submit write payable (1 GEN stake)
     showToast('Sign proposal in MetaMask...', 'info');

@@ -2,6 +2,18 @@
 
 from genlayer import *
 import json
+import dataclasses
+
+@dataclasses.dataclass
+class ConsensusResponse:
+    is_status_correct: bool
+    consensus_status: str
+    consensus_remark: str
+    reasoning: str
+    clinical_relevance: str
+    anatomy_involved: list[str]
+    key_medical_facts: list[str]
+
 
 @gl.evm.contract_interface
 class _Recipient:
@@ -137,51 +149,39 @@ Evidence Citation URL: "{clean_url}"
 
 VALIDATION INSTRUCTIONS:
 1. Analyze the evidence page content. Check if the URL is a reputable medical source (e.g., .gov, .org, .edu, reputable medical journals, AAO.org, WHO, NIH/NEI).
-2. Assess if the proposed claim is scientifically accurate regarding the human eye, eye health, medical science, and visual hygiene.
-3. Compare the proposed classification status ("VERIFIED", "DEBUNKED", or "UNVERIFIED") with what the source states and general ophthalmology consensus:
+2. INDEPENDENT CORROBORATION: You MUST independently corroborate the claim against recognized medical sources based on your internal medical knowledge (e.g., WHO, AAO, NIH guidelines) to strengthen the trust model.
+3. LOGICAL AGREEMENT REQUIREMENT: The 'is_status_correct' flag, your 'consensus_status', the proposer's classification, the existing stored status (if challenging), and your source-grounded 'reasoning' MUST logically agree. If they contradict, the validation is invalid.
+4. Assess if the proposed claim is scientifically accurate regarding the human eye, eye health, medical science, and visual hygiene.
+5. Compare the proposed classification status ("VERIFIED", "DEBUNKED", or "UNVERIFIED") with what the source states and general ophthalmology consensus:
    - VERIFIED: The claim is scientifically proven, safe, and supported by peer-reviewed evidence and standard eye care guidelines.
    - DEBUNKED: The claim is medically false, disproven, ineffective, dangerous, or a known myth.
    - UNVERIFIED: The claim lacks sufficient clinical trials, has conflicting studies, or is an unproven hypothesis.
-4. Set "is_status_correct" to true ONLY if the proposer's "Proposed Classification Status" matches the true scientific status (VERIFIED, DEBUNKED, or UNVERIFIED) based on the evidence and medical consensus.
-5. Provide a "consensus_remark" for the classification:
-   - If status is VERIFIED: The remark MUST highlight the scientific backing, safety, and evidence supporting it.
-   - If status is DEBUNKED: The remark MUST issue a clear medical warning, explain why it is false/unsafe, and cite the correct guidelines.
-   - If status is UNVERIFIED: The remark MUST explain the lack of clinical evidence, need for studies, or mixed results.
 6. Provide a detailed "reasoning" from the webpage, a "clinical_relevance" for eye health, list the eye structures involved (e.g., "Cornea", "Lens", "Retina", "Optic Nerve", "Macula") in "anatomy_involved", and extract 2-3 "key_medical_facts".
+"""
 
-Return ONLY a valid JSON object (no markdown, no extra explanation text):
-{{
-    "is_status_correct": false,
-    "consensus_status": "DEBUNKED",
-    "consensus_remark": "Remark detailing the classification outcome and general medical advice.",
-    "reasoning": "Detailed breakdown comparing the claim to the citation text.",
-    "clinical_relevance": "Ophthalmological explanation of how this claim affects vision or optical health.",
-    "anatomy_involved": [],
-    "key_medical_facts": []
-}}"""
-
-        result_str = gl.eq_principle.prompt_non_comparative(
+        data_obj = gl.eq_principle.prompt_non_comparative(
             build_prompt,
             task="Fact-check the proposed eye health claim using the evidence URL.",
             criteria=(
-                "The response is a valid JSON object containing 'is_status_correct' (boolean), "
-                "'consensus_status' (string matching VERIFIED, DEBUNKED, or UNVERIFIED), "
-                "'consensus_remark' (string containing a classification remark), "
-                "and 'reasoning' (string explaining findings). The validation must check if the "
-                "evidence URL supports the claim and matches medical fact."
+                "The consensus MUST strictly type the output. The 'is_status_correct' flag, "
+                "proposed classification, stored status, and source-grounded reasoning MUST "
+                "logically agree. Independent corroboration from recognized medical sources "
+                "MUST be performed."
             ),
+            output_type=ConsensusResponse
         )
 
         # ── Parse AI output ──
         try:
-            cleaned = result_str.strip()
-            if "```" in cleaned:
-                s = cleaned.find("{"); e = cleaned.rfind("}") + 1
-                if s >= 0 and e > s:
-                    cleaned = cleaned[s:e]
-            data = json.loads(cleaned)
-            if not isinstance(data, dict):
-                data = {}
+            data = {
+                "is_status_correct": data_obj.is_status_correct,
+                "consensus_status": data_obj.consensus_status,
+                "consensus_remark": data_obj.consensus_remark,
+                "reasoning": data_obj.reasoning,
+                "clinical_relevance": data_obj.clinical_relevance,
+                "anatomy_involved": data_obj.anatomy_involved,
+                "key_medical_facts": data_obj.key_medical_facts
+            }
         except Exception:
             data = {}
 
