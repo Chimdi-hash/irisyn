@@ -401,6 +401,9 @@ function resetFormState() {
   document.getElementById('claim-title').value = '';
   document.getElementById('claim-url').value = '';
   document.getElementById('claim-text').value = '';
+  
+  const warningText = document.getElementById('challenge-warning');
+  if (warningText) warningText.style.display = 'none';
 }
 
 // Visual indicator steps update
@@ -904,6 +907,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         applyFilterAndRender();
       });
     });
+
+    // Challenge Mode dynamic detector
+    const titleInput = document.getElementById('claim-title');
+    const warningText = document.getElementById('challenge-warning');
+    let titleDebounceTimer;
+
+    if (titleInput && warningText) {
+      titleInput.addEventListener('input', (e) => {
+        clearTimeout(titleDebounceTimer);
+        const val = e.target.value.trim();
+        if (!val) {
+          warningText.style.display = 'none';
+          return;
+        }
+        
+        titleDebounceTimer = setTimeout(async () => {
+          try {
+            const cachedStr = await window.readGenLayer(CONTRACT_ADDRESS, 'get_cached_claim', [val]);
+            if (cachedStr && cachedStr !== "null" && cachedStr.length > 5) {
+              // Try to parse to ensure it's a real claim object
+              const parsed = JSON.parse(cachedStr);
+              if (parsed && parsed.explanation) {
+                warningText.style.display = 'block';
+              } else {
+                warningText.style.display = 'none';
+              }
+            } else {
+              warningText.style.display = 'none';
+            }
+          } catch (err) {
+            warningText.style.display = 'none';
+          }
+        }, 500);
+      });
+    }
   } else if (currentPage === 'portfolio.html') {
     await loadPortfolioDetails();
   }
