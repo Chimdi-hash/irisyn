@@ -204,3 +204,31 @@ def test_irisyn_staking_rewards_and_burning(direct_deploy, direct_vm, direct_ali
     finally:
         if original_prompt:
             gl.eq_principle.prompt_non_comparative = original_prompt
+
+
+def test_withdraw_inbalance(direct_deploy, direct_vm, direct_alice, direct_bob):
+    contract = direct_deploy('irisyn_contract.py')
+    import json
+    import genlayer.gl as gl
+
+    # Fund treasury with 5 GEN
+    with direct_vm.prank(direct_bob):
+        direct_vm.value = 5 * 10**18
+        contract.fund_treasury()
+
+    # Mock AI response
+    correct_json = json.dumps({
+        'is_status_correct': True, 'consensus_status': 'VERIFIED',
+        'consensus_remark': '...', 'reasoning': 'This mock reasoning string is sufficiently long to pass the length check.',
+        'clinical_relevance': '...', 'anatomy_involved': [], 'key_medical_facts': []
+    })
+    gl.eq_principle.prompt_non_comparative = lambda prompt, task, criteria: correct_json
+
+    # Alice proposes
+    with direct_vm.prank(direct_alice):
+        direct_vm.value = 1 * 10**18
+        contract.propose_claim('Test Title', 'Test text', 'Test Condition', 'VERIFIED', 'https://test.com')
+
+    # Alice tries to withdraw
+    with direct_vm.prank(direct_alice):
+        contract.withdraw_rewards()

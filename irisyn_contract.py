@@ -182,31 +182,54 @@ Return ONLY a valid JSON object matching this schema:
         )
 
         # ── Parse AI output ──
+        cleaned = result_str.strip()
+        if "```" in cleaned:
+            s = cleaned.find("{"); e = cleaned.rfind("}") + 1
+            if s >= 0 and e > s:
+                cleaned = cleaned[s:e]
+        
         try:
-            cleaned = result_str.strip()
-            if "```" in cleaned:
-                s = cleaned.find("{"); e = cleaned.rfind("}") + 1
-                if s >= 0 and e > s:
-                    cleaned = cleaned[s:e]
             data_dict = json.loads(cleaned)
-            # Strictly type and enforce schema structure natively
-            data_obj = ConsensusResponse(
-                is_status_correct=bool(data_dict.get("is_status_correct", False)),
-                consensus_status=str(data_dict.get("consensus_status", "UNVERIFIED")),
-                consensus_remark=str(data_dict.get("consensus_remark", "")),
-                reasoning=str(data_dict.get("reasoning", "")),
-                clinical_relevance=str(data_dict.get("clinical_relevance", "")),
-                anatomy_involved=list(data_dict.get("anatomy_involved", [])),
-                key_medical_facts=list(data_dict.get("key_medical_facts", []))
-            )
-            data = dataclasses.asdict(data_obj)
         except Exception:
-            data = {}
+            raise Exception("Failed to parse LLM consensus output as valid JSON.")
 
-        is_status_correct = bool(data.get("is_status_correct", False))
-        consensus_status = data.get("consensus_status", clean_status).upper()
+        # 1. Enforce Strict Typing (No Coercion)
+        if "is_status_correct" not in data_dict or type(data_dict["is_status_correct"]) is not bool:
+            raise Exception("Strict typing violation: 'is_status_correct' MUST be a boolean.")
+        
+        if "consensus_status" not in data_dict or type(data_dict["consensus_status"]) is not str:
+            raise Exception("Strict typing violation: 'consensus_status' MUST be a string.")
+
+        if "reasoning" not in data_dict or type(data_dict["reasoning"]) is not str or len(data_dict["reasoning"].strip()) < 10:
+            raise Exception("Strict typing violation: 'reasoning' MUST be a valid, detailed string.")
+
+        is_status_correct = data_dict["is_status_correct"]
+        consensus_status = data_dict["consensus_status"].strip().upper()
+
         if consensus_status not in ["VERIFIED", "DEBUNKED", "UNVERIFIED"]:
-            consensus_status = "UNVERIFIED"
+            raise Exception("Value violation: 'consensus_status' must be VERIFIED, DEBUNKED, or UNVERIFIED.")
+
+        # 2. Enforce Logical Agreement Before Payout/Updates
+        if is_status_correct:
+            if consensus_status != clean_status:
+                raise Exception(f"Logical agreement failure: correctness flag is true but consensus_status '{consensus_status}' contradicts proposed status '{clean_status}'.")
+            if is_challenge and consensus_status == existing_status:
+                raise Exception(f"Logical agreement failure: challenge marked correct but consensus_status '{consensus_status}' matches the old stored status.")
+        else:
+            if consensus_status == clean_status:
+                raise Exception(f"Logical agreement failure: correctness flag is false but consensus_status '{consensus_status}' matches the proposed status '{clean_status}'.")
+
+        # Map to object for downstream logic safely
+        data_obj = ConsensusResponse(
+            is_status_correct=is_status_correct,
+            consensus_status=consensus_status,
+            consensus_remark=str(data_dict.get("consensus_remark", "")),
+            reasoning=data_dict["reasoning"],
+            clinical_relevance=str(data_dict.get("clinical_relevance", "")),
+            anatomy_involved=list(data_dict.get("anatomy_involved", [])),
+            key_medical_facts=list(data_dict.get("key_medical_facts", []))
+        )
+        data = dataclasses.asdict(data_obj)
 
         # Provide fallback remarks if JSON parse didn't return one
         fallback_remarks = {
