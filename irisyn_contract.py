@@ -2,18 +2,6 @@
 
 from genlayer import *
 import json
-import dataclasses
-
-@dataclasses.dataclass
-class ConsensusResponse:
-    is_status_correct: bool
-    consensus_status: str
-    consensus_remark: str
-    reasoning: str
-    clinical_relevance: str
-    anatomy_involved: list[str]
-    key_medical_facts: list[str]
-
 
 @gl.evm.contract_interface
 class _Recipient:
@@ -220,16 +208,15 @@ Return ONLY a valid JSON object matching this schema:
                 raise Exception(f"Logical agreement failure: correctness flag is false but consensus_status '{consensus_status}' matches the proposed status '{clean_status}'.")
 
         # Map to object for downstream logic safely
-        data_obj = ConsensusResponse(
-            is_status_correct=is_status_correct,
-            consensus_status=consensus_status,
-            consensus_remark=str(data_dict.get("consensus_remark", "")),
-            reasoning=data_dict["reasoning"],
-            clinical_relevance=str(data_dict.get("clinical_relevance", "")),
-            anatomy_involved=list(data_dict.get("anatomy_involved", [])),
-            key_medical_facts=list(data_dict.get("key_medical_facts", []))
-        )
-        data = dataclasses.asdict(data_obj)
+        data = {
+            "is_status_correct": is_status_correct,
+            "consensus_status": consensus_status,
+            "consensus_remark": str(data_dict.get("consensus_remark", "")),
+            "reasoning": data_dict["reasoning"],
+            "clinical_relevance": str(data_dict.get("clinical_relevance", "")),
+            "anatomy_involved": list(data_dict.get("anatomy_involved", [])),
+            "key_medical_facts": list(data_dict.get("key_medical_facts", []))
+        }
 
         # Provide fallback remarks if JSON parse didn't return one
         fallback_remarks = {
@@ -247,8 +234,8 @@ Return ONLY a valid JSON object matching this schema:
             "remark": consensus_remark,
             "reasoning": data.get("reasoning", "Evidence page could not be parsed fully."),
             "clinical_relevance": data.get("clinical_relevance", "Consult an ophthalmologist for professional diagnostics."),
-            "anatomy_involved": data.get("anatomy_involved", []) if isinstance(data.get("anatomy_involved"), list) else [],
-            "key_medical_facts": data.get("key_medical_facts", []) if isinstance(data.get("key_medical_facts"), list) else [],
+            "anatomy_involved": data.get("anatomy_involved", []),
+            "key_medical_facts": data.get("key_medical_facts", []),
             "evidence_url": clean_url
         }
 
