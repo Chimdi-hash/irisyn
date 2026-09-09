@@ -318,21 +318,35 @@ function initNavbarToggle() {
 
 // ── Wait for finalization status on GenLayer ──
 async function waitForGenLayerFinalized(txHash, updateStepsCallback) {
-  if (updateStepsCallback) updateStepsCallback(2); // Acknowledging network execution
-  
-  try {
-    // Point 4: Use the bundled SDK's native transaction handling instead of custom polling
-    const receipt = await window.genlayerClient.waitForTransactionReceipt({ hash: txHash });
+  const MAX_WAIT_MS = 600000; // 10 minutes
+  const POLL_MS = 3000;
+  const start = Date.now();
+
+  if (updateStepsCallback) updateStepsCallback(2); // Network acknowledged
+
+  while (Date.now() - start < MAX_WAIT_MS) {
+    await sleep(POLL_MS);
     
-    if (updateStepsCallback) updateStepsCallback(4); // Finalized
-    
-    const success = receipt.status === 'success' || receipt.status === 1 || receipt.status === '0x1' || receipt.status === true;
-    
-    return { isFinalized: true, isSuccess: success, isError: !success, receipt };
-  } catch (e) {
-    console.error('SDK transaction wait error:', e);
-    return { isFinalized: true, isSuccess: false, isError: true };
+    try {
+      // Point 4: Use the bundled SDK's native transaction-status handling function
+      const statusObj = await window.getGenLayerTxStatus(txHash);
+      
+      // Update UI steps dynamically if needed
+      if (updateStepsCallback && !statusObj.isFinalized) {
+        const elapsed = Date.now() - start;
+        if (elapsed > 15000) updateStepsCallback(3); // Moving to consensus wait
+      }
+
+      if (statusObj.isFinalized) {
+        if (updateStepsCallback) updateStepsCallback(4); // Finalized!
+        return statusObj; // { isFinalized, isSuccess, isError, ... }
+      }
+    } catch (e) {
+      console.warn('SDK transaction wait error:', e);
+    }
   }
+  
+  return { isFinalized: true, isSuccess: false, isError: true, timedOut: true };
 }
 
 // ── REGISTRY SCRIPTS (registry.html) ──
