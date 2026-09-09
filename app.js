@@ -465,40 +465,48 @@ async function submitClaimProposal() {
       return;
     }
 
-    // Wait 2s for state update
-    await sleep(2000);
-
-    // Read result
-    const resultObj = await window.readGenLayer(CONTRACT_ADDRESS, 'get_cached_claim', [title]);
-    const parsedResult = typeof resultObj === 'string' ? JSON.parse(resultObj) : resultObj;
+    // Read result with a retry loop to handle RPC state sync delays
+    let parsedResult = null;
+    let rejectedClaim = null;
+    
+    for (let attempts = 0; attempts < 4; attempts++) {
+      await sleep(3000); // Wait 3s per attempt (up to 12s total)
+      
+      const resultObj = await window.readGenLayer(CONTRACT_ADDRESS, 'get_cached_claim', [title]);
+      parsedResult = typeof resultObj === 'string' ? JSON.parse(resultObj) : resultObj;
+      
+      if (parsedResult && parsedResult.explanation) {
+        break; // Found it in the registry!
+      }
+      
+      const historyStr = await window.readGenLayer(CONTRACT_ADDRESS, 'get_user_history', [window.irisynWallet.address]);
+      const history = typeof historyStr === 'string' ? JSON.parse(historyStr) : historyStr;
+      
+      if (Array.isArray(history)) {
+        rejectedClaim = history.find(h => h.title.trim().toLowerCase() === title.trim().toLowerCase() && !h.accepted);
+        if (rejectedClaim) break; // Found it in the rejected history!
+      }
+    }
 
     if (parsedResult && parsedResult.explanation) {
       showToast('Verification successfully finalized on-chain!', 'success');
       renderConsensusResult(parsedResult.explanation);
+    } else if (rejectedClaim) {
+      showToast('Your proposal was REJECTED by consensus. 1 GEN stake was burned.', 'error', 8000);
+      renderConsensusResult({
+        title: title,
+        claim_text: text,
+        condition: condition,
+        status: rejectedClaim.status || 'DEBUNKED',
+        remark: rejectedClaim.remark || 'Slashing event: Proposed status did not align with actual evidence. Stake burned.',
+        reasoning: 'The AI consensus validators inspected the citation URL and evaluated that the proposed classification did not match scientific evidence. As a result, the statement was rejected and the proposal stake was burned.',
+        clinical_relevance: 'Always ensure your claims match peer-reviewed facts prior to proposing.',
+        anatomy_involved: [],
+        key_medical_facts: [],
+        evidence_url: url
+      });
     } else {
-      // Check if proposer was wrong -> stake burned (not cached as valid)
-      // Check user history to see if it was recorded as rejected
-      const historyStr = await window.readGenLayer(CONTRACT_ADDRESS, 'get_user_history', [window.irisynWallet.address]);
-      const history = typeof historyStr === 'string' ? JSON.parse(historyStr) : historyStr;
-      
-      const rejectedClaim = history.find(h => h.title.trim().toLowerCase() === title.trim().toLowerCase() && !h.accepted);
-      if (rejectedClaim) {
-        showToast('Your proposal was REJECTED by consensus. 1 GEN stake was burned.', 'error', 8000);
-        renderConsensusResult({
-          title: title,
-          claim_text: text,
-          condition: condition,
-          status: rejectedClaim.status || 'DEBUNKED',
-          remark: rejectedClaim.remark || 'Slashing event: Proposed status did not align with actual evidence. Stake burned.',
-          reasoning: 'The AI consensus validators inspected the citation URL and evaluated that the proposed classification did not match scientific evidence. As a result, the statement was rejected and the proposal stake was burned.',
-          clinical_relevance: 'Always ensure your claims match peer-reviewed facts prior to proposing.',
-          anatomy_involved: [],
-          key_medical_facts: [],
-          evidence_url: url
-        });
-      } else {
-        throw new Error('Verification details could not be found.');
-      }
+      throw new Error('RPC sync delay: Verification details could not be found after multiple attempts. Please refresh the page in a few seconds.');
     }
 
     // Refresh wallet UI balance
