@@ -318,58 +318,21 @@ function initNavbarToggle() {
 
 // ── Wait for finalization status on GenLayer ──
 async function waitForGenLayerFinalized(txHash, updateStepsCallback) {
-  const MAX_WAIT_MS = 600000; // 10 minutes
-  const POLL_MS = 4000;
-  const start = Date.now();
-  let step = 1; // 1: Sign (done), 2: Scrape, 3: Consensus, 4: Finalize
-
-  if (updateStepsCallback) updateStepsCallback(step);
-
-  while (Date.now() - start < MAX_WAIT_MS) {
-    await sleep(POLL_MS);
+  if (updateStepsCallback) updateStepsCallback(2); // Acknowledging network execution
+  
+  try {
+    // Point 4: Use the bundled SDK's native transaction handling instead of custom polling
+    const receipt = await window.genlayerClient.waitForTransactionReceipt({ hash: txHash });
     
-    // Simulate progression of visual steps or read tx logs
-    const elapsed = Date.now() - start;
-    if (elapsed > 10000 && step === 1 && updateStepsCallback) {
-      step = 2; // Move to scrape
-      updateStepsCallback(step);
-    }
-    if (elapsed > 25000 && step === 2 && updateStepsCallback) {
-      step = 3; // Move to consensus
-      updateStepsCallback(step);
-    }
-
-    try {
-      const resp = await fetch(GENLAYER_CONFIG.rpcUrls[0], {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          method: 'eth_getTransactionByHash',
-          params: [txHash],
-          id: 1
-        })
-      });
-      const data = await resp.json();
-      
-      if (data && data.result) {
-        const tx = data.result;
-        const status = (tx.status || '').toUpperCase();
-        
-        if (status === 'ACCEPTED' || status === 'FINALIZED') {
-          if (updateStepsCallback) updateStepsCallback(4); // Completed!
-          return { isFinalized: true, isSuccess: true, isError: false };
-        }
-        
-        if (status === 'ERROR' || status === 'CANCELLED') {
-          return { isFinalized: true, isSuccess: false, isError: true };
-        }
-      }
-    } catch (e) {
-      console.warn('Transaction status poll error:', e);
-    }
+    if (updateStepsCallback) updateStepsCallback(4); // Finalized
+    
+    const success = receipt.status === 'success' || receipt.status === 1 || receipt.status === '0x1' || receipt.status === true;
+    
+    return { isFinalized: true, isSuccess: success, isError: !success, receipt };
+  } catch (e) {
+    console.error('SDK transaction wait error:', e);
+    return { isFinalized: true, isSuccess: false, isError: true };
   }
-  return { isFinalized: false, isSuccess: false, isError: false, timedOut: true };
 }
 
 // ── REGISTRY SCRIPTS (registry.html) ──
