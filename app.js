@@ -460,7 +460,7 @@ async function submitClaimProposal() {
     const receipt = await waitForGenLayerFinalized(txHash, updateConsensusVisualSteps);
 
     if (receipt.isError) {
-      showToast('Consensus execution failed. Check proposal parameters.', 'error');
+      showToast('Transaction Reverted: AI Consensus rejected your claim or Identity Validation failed. Stake burned.', 'error', 8000);
       resetFormState();
       return;
     }
