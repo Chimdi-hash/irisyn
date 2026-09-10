@@ -96,6 +96,8 @@ class IrisynRegistry(gl.Contract):
                     raise Exception("Identity Error: During a challenge, the claim text must exactly match the existing claim text.")
                 if clean_condition != existing_claim["explanation"]["condition"]:
                     raise Exception("Identity Error: During a challenge, the condition must exactly match the existing condition.")
+                if clean_url != existing_claim["explanation"]["evidence_url"]:
+                    raise Exception("Identity Error: During a challenge, the evidence URL must exactly match the existing evidence URL.")
             except Exception as e:
                 if "Identity Error" in str(e):
                     raise e
@@ -114,20 +116,20 @@ class IrisynRegistry(gl.Contract):
         if current_balance < current_total_pending + (int(stake) * 2):
             raise Exception("Contract treasury does not have enough uncommitted funds to back this reward.")
 
-        # ── AI Validation Prompt via Equivalence Principle ──
+        # 🎯 AI Validation Prompt via Equivalence Principle 🎯
         def build_prompt() -> str:
             # Fetch the actual web page content inside the non-deterministic block
             web_data = gl.nondet.web.render(clean_url, mode='text')
             
             # Point 1: Fetch independent corroboration source
-            try:
-                # Use Wikipedia as a highly reliable, independent, accessible secondary source baseline for the condition
-                independent_url = f"https://en.wikipedia.org/wiki/{urllib.parse.quote(clean_condition.replace(' ', '_'))}"
-                independent_data = gl.nondet.web.render(independent_url, mode='text')
-                independent_data = independent_data[:10000] # limit size
-            except Exception:
-                independent_data = "Independent fetch failed."
+            independent_url = f"https://en.wikipedia.org/wiki/{urllib.parse.quote(clean_condition.replace(' ', '_'))}"
+            independent_data = gl.nondet.web.render(independent_url, mode='text')
+            
+            if not independent_data or len(independent_data.strip()) < 50:
+                raise Exception("Corroboration Error: Failed to fetch a valid, non-empty independent baseline from the authoritative source.")
                 
+            independent_data = independent_data[:10000] # limit size
+            
             # Point 2: Pin evidence via cryptographic hash
             evidence_hash = hashlib.sha256(web_data.encode('utf-8', errors='ignore')).hexdigest()
             independent_hash = hashlib.sha256(independent_data.encode('utf-8', errors='ignore')).hexdigest()
@@ -174,17 +176,16 @@ VALIDATION INSTRUCTIONS:
    - UNVERIFIED: The claim lacks sufficient clinical trials, has conflicting studies, or is an unproven hypothesis.
 6. Provide a detailed "reasoning" from the webpage, a "clinical_relevance" for eye health, list the eye structures involved (e.g., "Cornea", "Lens", "Retina", "Optic Nerve", "Macula") in "anatomy_involved", and extract 2-3 "key_medical_facts".
 
-Return ONLY a valid JSON object matching this schema:
+
+OUTPUT FORMAT (JSON ONLY):
 {{
-    "is_status_correct": false,
-    "consensus_status": "DEBUNKED",
-    "consensus_remark": "Remark detailing the classification outcome and general medical advice.",
-    "reasoning": "Detailed breakdown comparing the claim to the citation text.",
-    "clinical_relevance": "Ophthalmological explanation of how this claim affects vision or optical health.",
-    "anatomy_involved": [],
-    "key_medical_facts": [],
-    "evidence_hash": "{evidence_hash}",
-    "independent_hash": "{independent_hash}"
+  "is_status_correct": <boolean>,
+  "consensus_status": "<VERIFIED | DEBUNKED | UNVERIFIED>",
+  "consensus_remark": "<Short explanation>",
+  "reasoning": "<Detailed medical reasoning>",
+  "clinical_relevance": "<Clinical context>",
+  "anatomy_involved": ["<List>", "<of>", "<Anatomy>"],
+  "key_medical_facts": ["<List>", "<of>", "<Facts>"]
 }}
 """
 
@@ -198,7 +199,7 @@ Return ONLY a valid JSON object matching this schema:
             )
         )
 
-        # ── Parse AI output ──
+        # 🎯 Parse AI output 🎯
         cleaned = result_str.strip()
         if "```" in cleaned:
             s = cleaned.find("{"); e = cleaned.rfind("}") + 1
@@ -214,14 +215,8 @@ Return ONLY a valid JSON object matching this schema:
         if "is_status_correct" not in data_dict or type(data_dict["is_status_correct"]) is not bool:
             raise Exception("Strict typing violation: 'is_status_correct' MUST be a boolean.")
         
-        if "consensus_status" not in data_dict or type(data_dict["consensus_status"]) is not str:
-            raise Exception("Strict typing violation: 'consensus_status' MUST be a string.")
-
-        if "reasoning" not in data_dict or type(data_dict["reasoning"]) is not str or len(data_dict["reasoning"].strip()) < 10:
-            raise Exception("Strict typing violation: 'reasoning' MUST be a valid, detailed string.")
-
         is_status_correct = data_dict["is_status_correct"]
-        consensus_status = data_dict["consensus_status"].strip().upper()
+        consensus_status = str(data_dict.get("consensus_status", "")).strip().upper()
 
         if consensus_status not in ["VERIFIED", "DEBUNKED", "UNVERIFIED"]:
             raise Exception("Value violation: 'consensus_status' must be VERIFIED, DEBUNKED, or UNVERIFIED.")
@@ -237,14 +232,17 @@ Return ONLY a valid JSON object matching this schema:
                 raise Exception(f"Logical agreement failure: correctness flag is false but consensus_status '{consensus_status}' matches the proposed status '{clean_status}'.")
 
         # Map to object for downstream logic safely
+        # Ensure we pin the ACTUAL Python-computed hashes, completely ignoring whatever the LLM outputs!
         data = {
             "is_status_correct": is_status_correct,
             "consensus_status": consensus_status,
             "consensus_remark": str(data_dict.get("consensus_remark", "")),
-            "reasoning": data_dict["reasoning"],
+            "reasoning": data_dict.get("reasoning", "Evidence page could not be parsed fully."),
             "clinical_relevance": str(data_dict.get("clinical_relevance", "")),
             "anatomy_involved": list(data_dict.get("anatomy_involved", [])),
-            "key_medical_facts": list(data_dict.get("key_medical_facts", []))
+            "key_medical_facts": list(data_dict.get("key_medical_facts", [])),
+            "evidence_hash": evidence_hash,
+            "independent_hash": independent_hash
         }
 
         # Provide fallback remarks if JSON parse didn't return one

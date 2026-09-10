@@ -38727,6 +38727,10 @@ ${prettyStateOverride(stateOverride)}`;
         const balance = await client.getBalance({ address });
         return (Number(balance) / 1e18).toFixed(4);
       };
+      window.waitForGenLayerTransaction = async function(txHash) {
+        const client = createClient2({ chain: studionet, transport: window.ethereum ? custom(window.ethereum) : void 0 });
+        return await client.waitForTransactionReceipt({ hash: txHash, status: "FINALIZED", fullTransaction: true });
+      };
       window.getGenLayerTxStatus = async function(txHash) {
         const resp = await fetch(GENLAYER_RPC, {
           method: "POST",
