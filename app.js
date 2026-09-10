@@ -17,8 +17,8 @@ const GENLAYER_CONFIG = {
   blockExplorerUrls: []
 };
 
-// Deployed Irisyn Intelligent Contract Address
-const CONTRACT_ADDRESS = '0xc3FC7083fd74aEfD679eccD43D3Ca289072BFAA8';
+// === Contract Address ===
+const CONTRACT_ADDRESS = '0x74d5518Bcdc735B7289eAF01b6a31a46Be56D9EA';
 
 // ── Wallet State ──
 window.irisynWallet = {
