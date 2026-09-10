@@ -332,7 +332,7 @@ async function waitForGenLayerFinalized(txHash, updateStepsCallback) {
       if (receipt && receipt.consensus_data && receipt.consensus_data.validators && receipt.consensus_data.validators.length > 0) {
         const val = receipt.consensus_data.validators[0];
         executionResult = val.execution_result || val.genvm_result?.execution_result || 'SUCCESS';
-      } else if (receipt.status === 'reverted' || receipt.status === 0 || receipt.status === '0x0') {
+      } else if (receipt && (receipt.status === 'reverted' || receipt.status === 0 || receipt.status === '0x0')) {
         executionResult = 'ERROR';
       }
     } catch(e) {}
@@ -341,8 +341,10 @@ async function waitForGenLayerFinalized(txHash, updateStepsCallback) {
     
     return { isFinalized: true, isSuccess: success, isError: !success, receipt };
   } catch (e) {
-    console.warn('SDK transaction wait error:', e);
-    return { isFinalized: true, isSuccess: false, isError: true, timedOut: true };
+    console.warn('SDK transaction wait error (Ignoring and falling back to state sync):', e);
+    // Fallback: The SDK crashed or timed out, but the transaction might have succeeded perfectly.
+    // Return success to allow the downstream registry polling to determine the actual on-chain outcome!
+    return { isFinalized: true, isSuccess: true, isError: false, timedOut: true };
   }
 }
 
@@ -466,8 +468,8 @@ async function submitClaimProposal() {
     let parsedResult = null;
     let rejectedClaim = null;
     
-    for (let attempts = 0; attempts < 4; attempts++) {
-      await sleep(3000); // Wait 3s per attempt (up to 12s total)
+    for (let attempts = 0; attempts < 8; attempts++) {
+      await sleep(3000); // Wait 3s per attempt (up to 24s total)
       
       const resultObj = await window.readGenLayer(CONTRACT_ADDRESS, 'get_cached_claim', [title]);
       parsedResult = typeof resultObj === 'string' ? JSON.parse(resultObj) : resultObj;
