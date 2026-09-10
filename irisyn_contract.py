@@ -105,6 +105,22 @@ class IrisynRegistry(gl.Contract):
             
             if clean_status == existing_status:
                 raise Exception(f"This claim is already registered in the registry with status '{existing_status}'. To challenge it, you must propose a different classification status.")
+        
+        # 🎯 Perform Web Fetches & Cryptographic Hashing Locally 🎯
+        # The GenLayer Equivalence Principle will automatically trace these non-deterministic calls
+        web_data = gl.nondet.web.render(clean_url, mode='text')
+        
+        independent_url = f"https://en.wikipedia.org/wiki/{urllib.parse.quote(clean_condition.replace(' ', '_'))}"
+        independent_data = gl.nondet.web.render(independent_url, mode='text')
+        
+        if not independent_data or len(independent_data.strip()) < 50:
+            raise Exception("Corroboration Error: Failed to fetch a valid, non-empty independent baseline from the authoritative source.")
+            
+        independent_data = independent_data[:10000] # limit size
+        
+        # Cryptographically pin the raw payloads locally (Anti-Adversarial)
+        evidence_hash = hashlib.sha256(web_data.encode('utf-8', errors='ignore')).hexdigest()
+        independent_hash = hashlib.sha256(independent_data.encode('utf-8', errors='ignore')).hexdigest()
 
         # Check treasury balance to back the potential 2x reward (stake + 1 GEN reward)
         try:
@@ -118,22 +134,6 @@ class IrisynRegistry(gl.Contract):
 
         # 🎯 AI Validation Prompt via Equivalence Principle 🎯
         def build_prompt() -> str:
-            # Fetch the actual web page content inside the non-deterministic block
-            web_data = gl.nondet.web.render(clean_url, mode='text')
-            
-            # Point 1: Fetch independent corroboration source
-            independent_url = f"https://en.wikipedia.org/wiki/{urllib.parse.quote(clean_condition.replace(' ', '_'))}"
-            independent_data = gl.nondet.web.render(independent_url, mode='text')
-            
-            if not independent_data or len(independent_data.strip()) < 50:
-                raise Exception("Corroboration Error: Failed to fetch a valid, non-empty independent baseline from the authoritative source.")
-                
-            independent_data = independent_data[:10000] # limit size
-            
-            # Point 2: Pin evidence via cryptographic hash
-            evidence_hash = hashlib.sha256(web_data.encode('utf-8', errors='ignore')).hexdigest()
-            independent_hash = hashlib.sha256(independent_data.encode('utf-8', errors='ignore')).hexdigest()
-            
             challenge_section = ""
             if is_challenge:
                 challenge_section = f"""
