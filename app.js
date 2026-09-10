@@ -326,8 +326,18 @@ async function waitForGenLayerFinalized(txHash, updateStepsCallback) {
     
     if (updateStepsCallback) updateStepsCallback(4); // Finalized!
     
-    // GenLayer JS SDK receipt usually contains a 'status' field ('success', 'reverted')
-    const success = receipt.status === 'success' || receipt.status === 1 || receipt.status === '0x1' || receipt.status === true;
+    // GenLayer JS SDK receipt returns the full consensus execution tree
+    let executionResult = 'SUCCESS';
+    try {
+      if (receipt && receipt.consensus_data && receipt.consensus_data.validators && receipt.consensus_data.validators.length > 0) {
+        const val = receipt.consensus_data.validators[0];
+        executionResult = val.execution_result || val.genvm_result?.execution_result || 'SUCCESS';
+      } else if (receipt.status === 'reverted' || receipt.status === 0 || receipt.status === '0x0') {
+        executionResult = 'ERROR';
+      }
+    } catch(e) {}
+    
+    const success = executionResult !== 'ERROR';
     
     return { isFinalized: true, isSuccess: success, isError: !success, receipt };
   } catch (e) {
