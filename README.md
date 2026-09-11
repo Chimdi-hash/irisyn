@@ -4,9 +4,9 @@ Irisyn is an AI-validated, on-chain registry for eye health claims, medical fact
 
 ---
 
-## 🌐 Deployed Contract Address
-The Intelligent Contract is successfully deployed on the GenLayer Studio network:
-- **Contract Address:** `0x3F2f8e7C37cBaCaDD01CA64ed4DcaBAA8e63072E`
+## 🚀 Live Deployment
+- **Frontend App**: [https://irisyn.vercel.app/](https://irisyn.vercel.app/)
+- **GenLayer Smart Contract Address**: `0x2c6cEf8B3Bb49609A8Fc076d54029f477Aa64f47`
 
 ---
 

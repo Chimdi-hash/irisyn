@@ -18,7 +18,7 @@ const GENLAYER_CONFIG = {
 };
 
 // === Contract Address ===
-const CONTRACT_ADDRESS = '0x3F2f8e7C37cBaCaDD01CA64ed4DcaBAA8e63072E';
+const CONTRACT_ADDRESS = '0x2c6cEf8B3Bb49609A8Fc076d54029f477Aa64f47';
 
 // ── Wallet State ──
 window.irisynWallet = {
