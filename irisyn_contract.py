@@ -4,6 +4,7 @@ from genlayer import *
 import json
 import hashlib
 import urllib.parse
+import re
 
 @gl.evm.contract_interface
 class _Recipient:
@@ -124,14 +125,18 @@ class IrisynRegistry(gl.Contract):
             # Fetch the actual web page content inside the non-deterministic block (REQUIRED by GenLayer)
             web_data = gl.nondet.web.render(clean_url, mode='text')
             
-            # Point 1: Fetch independent corroboration source
-            independent_url = f"https://en.wikipedia.org/wiki/{urllib.parse.quote(clean_condition.replace(' ', '_'))}"
-            independent_data = gl.nondet.web.render(independent_url, mode='text')
+            # Point 1: Fetch independent authoritative medical source (PubMed/NIH)
+            independent_url = f"https://pubmed.ncbi.nlm.nih.gov/?term={urllib.parse.quote(clean_condition.replace('_', '+'))}"
+            independent_res = gl.nondet.web.get(independent_url)
             
-            if not independent_data or len(independent_data.strip()) < 50:
-                raise Exception("Corroboration Error: Failed to fetch a valid, non-empty independent baseline from the authoritative source.")
+            if independent_res.status != 200:
+                raise Exception(f"Corroboration Error: Failed to fetch a valid independent baseline from the authoritative source (HTTP Status: {independent_res.status}).")
                 
-            independent_data = independent_data[:10000] # limit size
+            raw_body = independent_res.body if isinstance(independent_res.body, str) else independent_res.body.decode('utf-8', errors='ignore')
+            
+            # Since web.get returns raw HTML, strip tags roughly to save LLM tokens
+            import re
+            independent_data = re.sub('<[^<]+?>', ' ', raw_body)[:10000]
             
             # Point 2: Pin evidence via cryptographic hash locally in Python
             local_hashes['evidence'] = hashlib.sha256(web_data.encode('utf-8', errors='ignore')).hexdigest()

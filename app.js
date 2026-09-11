@@ -341,10 +341,9 @@ async function waitForGenLayerFinalized(txHash, updateStepsCallback) {
     
     return { isFinalized: true, isSuccess: success, isError: !success, receipt };
   } catch (e) {
-    console.warn('SDK transaction wait error (Ignoring and falling back to state sync):', e);
-    // Fallback: The SDK crashed or timed out, but the transaction might have succeeded perfectly.
-    // Return success to allow the downstream registry polling to determine the actual on-chain outcome!
-    return { isFinalized: true, isSuccess: true, isError: false, timedOut: true };
+    console.warn('SDK transaction wait error:', e);
+    // Explicitly fail on SDK timeout as requested by the steward
+    return { isFinalized: true, isSuccess: false, isError: true, timedOut: true, errorMessage: e.message };
   }
 }
 
@@ -459,7 +458,11 @@ async function submitClaimProposal() {
     const receipt = await waitForGenLayerFinalized(txHash, updateConsensusVisualSteps);
 
     if (receipt.isError) {
-      showToast('Transaction Reverted: AI Consensus rejected your claim or Identity Validation failed. Stake burned.', 'error', 8000);
+      if (receipt.timedOut) {
+        showToast(`Transaction SDK Error: ${receipt.errorMessage}`, 'error', 8000);
+      } else {
+        showToast('Transaction Reverted: AI Consensus rejected your claim or Identity Validation failed. Stake burned.', 'error', 8000);
+      }
       resetFormState();
       return;
     }
